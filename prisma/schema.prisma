@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+}
+
+// --- ENUMS ---
+enum Role {
+  ADMIN
+  AVALIADOR
+  ORIENTADOR
+}
+
+enum TipoCriterio {
+  NUMERICO
+  BOOLEANO
+  TEXTO
+}
+
+// --- USUÁRIOS E PAPÉIS ---
+model User {
+  id              String       @id @default(uuid()) // Será o mesmo UUID gerado pelo Supabase Auth
+  nome            String
+  email           String       @unique
+  role            Role         @default(AVALIADOR)
+  
+  // Relacionamentos
+  avaliacoesFeitas Avaliacao[]
+  turmasOrientadas Turma[]
+  ocorrencias      Ocorrencia[]
+
+  @@map("users")
+}
+
+// --- ESTRUTURA DO EVENTO ---
+model Edicao {
+  id        Int      @id @default(autoincrement())
+  ano       Int      @unique
+  ativo     Boolean  @default(true)
+  turmas    Turma[]
+
+  @@map("edicoes")
+}
+
+model Turma {
+  id           String      @id @default(uuid())
+  nome         String
+  temaLivro    String
+  edicaoId     Int
+  orientadorId String?
+  
+  edicao       Edicao      @relation(fields: [edicaoId], references: [id])
+  orientador   User?       @relation(fields: [orientadorId], references: [id])
+  avaliacoes   Avaliacao[]
+  ocorrencias  Ocorrencia[]
+
+  @@map("turmas")
+}
+
+// --- TEMPLATES DINÂMICOS (BAREMAS) ---
+model TemplateAvaliacao {
+  id          Int        @id @default(autoincrement())
+  nome        String     // Ex: "Ficha Orientador", "Barema IF Literário", "Primeiro Ano"
+  descricao   String?
+  criterios   Criterio[]
+  avaliacoes  Avaliacao[]
+
+  @@map("templates_avaliacao")
+}
+
+model Criterio {
+  id          Int               @id @default(autoincrement())
+  descricao   String            // Ex: "Acessibilidade e Inclusão", "Criatividade"
+  tipo        TipoCriterio      @default(NUMERICO)
+  pesoMaximo  Float?            // Usado se for NUMERICO (ex: 10)
+  templateId  Int
+  
+  template    TemplateAvaliacao @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  notas       NotaCriterio[]
+
+  @@map("criterios")
+}
+
+// --- EXECUÇÃO DAS AVALIAÇÕES ---
+model Avaliacao {
+  id          String         @id @default(uuid())
+  turmaId     String
+  avaliadorId String
+  templateId  Int
+  finalizada  Boolean        @default(false)
+  comentario  String?        // Comentário livre da ficha
+  
+  turma       Turma          @relation(fields: [turmaId], references: [id])
+  avaliador   User           @relation(fields: [avaliadorId], references: [id])
+  template    TemplateAvaliacao @relation(fields: [templateId], references: [id])
+  notas       NotaCriterio[]
+
+  @@unique([turmaId, avaliadorId]) // Um avaliador só avalia a mesma turma uma vez
+  @@map("avaliacoes")
+}
+
+model NotaCriterio {
+  id             Int        @id @default(autoincrement())
+  avaliacaoId    String
+  criterioId     Int
+  
+  // Apenas um desses campos será preenchido dependendo do TipoCriterio
+  valorNumerico  Float?     
+  valorBooleano  Boolean?   
+  valorTexto     String?    
+
+  avaliacao      Avaliacao  @relation(fields: [avaliacaoId], references: [id], onDelete: Cascade)
+  criterio       Criterio   @relation(fields: [criterioId], references: [id])
+
+  @@unique([avaliacaoId, criterioId]) // Impede notas duplicadas para o mesmo critério na mesma avaliação
+  @@map("notas_criterios")
+}
+
+// --- CANAL DE OCORRÊNCIAS ---
+model Ocorrencia {
+  id           String   @id @default(uuid())
+  descricao    String   // Problemas relatados
+  dataRegistro DateTime @default(now())
+  resolvida    Boolean  @default(false)
+  
+  orientadorId String
+  turmaId      String?  // Opcional, caso a ocorrência seja geral e não de uma turma específica
+
+  orientador   User     @relation(fields: [orientadorId], references: [id])
+  turma        Turma?   @relation(fields: [turmaId], references: [id])
+
+  @@map("ocorrencias")
+}

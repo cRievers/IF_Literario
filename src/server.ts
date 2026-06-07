@@ -4,6 +4,7 @@ import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import pg from 'pg';
+import { requireAuth, AuthRequest } from './middlewares/auth.js';
 
 const app = express();
 
@@ -40,6 +41,14 @@ app.get('/api/templates/:id', async (req, res) => {
         console.error(error);
         return res.status(500).json({ error: 'Erro interno no servidor' });
     }
+});
+
+app.get('/api/perfil', requireAuth, (req: AuthRequest, res) => {
+    // Se chegou aqui, o middleware deixou passar!
+    return res.json({
+        mensagem: 'Acesso autorizado ao IF Literário!',
+        usuario: req.user
+    });
 });
 
 // Inicialização do Servidor

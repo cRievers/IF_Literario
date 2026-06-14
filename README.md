@@ -13,6 +13,7 @@ Criado com foco em reaproveitamento, o sistema utiliza formulários dinâmicos q
 * TypeScript
 * Prisma ORM
 * Banco de Dados: PostgreSQL (Supabase)
+* ESModules
 
 **Frontend (Em breve):**
 * React + Vite

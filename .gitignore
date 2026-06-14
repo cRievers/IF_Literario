@@ -5,3 +5,8 @@ node_modules
 /generated/prisma
 
 .agents
+
+# Build outputs
+dist/
+/api/dist
+/web/dist

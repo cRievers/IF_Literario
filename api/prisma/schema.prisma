@@ -30,6 +30,8 @@ model User {
   avaliacoesFeitas Avaliacao[]
   turmasOrientadas Turma[]
   ocorrencias      Ocorrencia[]
+  alocacoes        Alocacao[]   @relation("AvaliadorAlocacoes")
+  logsAuditoria    LogAuditoria[]
 
   @@map("users")
 }
@@ -55,6 +57,7 @@ model Turma {
   orientador   User?       @relation(fields: [orientadorId], references: [id])
   avaliacoes   Avaliacao[]
   ocorrencias  Ocorrencia[]
+  alocacoes    Alocacao[]  @relation("TurmaAlocacoes")
 
   @@map("turmas")
 }
@@ -132,4 +135,30 @@ model Ocorrencia {
   turma        Turma?   @relation(fields: [turmaId], references: [id])
 
   @@map("ocorrencias")
+}
+
+// --- ALOCAÇÕES DE AVALIADORES ---
+model Alocacao {
+  id          String   @id @default(uuid())
+  avaliadorId String
+  turmaId     String
+  createdAt   DateTime @default(now())
+
+  avaliador   User     @relation("AvaliadorAlocacoes", fields: [avaliadorId], references: [id], onDelete: Cascade)
+  turma       Turma    @relation("TurmaAlocacoes", fields: [turmaId], references: [id], onDelete: Cascade)
+
+  @@unique([avaliadorId, turmaId])
+  @@map("alocacoes")
+}
+
+// --- REGISTRO DE LOGS DE AUDITORIA ---
+model LogAuditoria {
+  id        String   @id @default(uuid())
+  usuarioId String?
+  acao      String   // Ex: "CRIAR_AVALIACAO", "EXCLUIR_AVALIACAO", "RECALCULO_NOTA"
+  detalhes  String   // JSON string contendo o payload ou estado anterior
+  timestamp DateTime @default(now())
+
+  usuario   User?    @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
+  @@map("logs_auditoria")
 }

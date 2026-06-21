@@ -91,7 +91,14 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response, next: Next
             }
         });
 
-        // 2. Validar limite de avaliações do avaliador (Regra 3x3) e limite por turma (somente para novas avaliações)
+        // 2. Validar se o usuário é ORIENTADOR e se é orientador da turma
+        if (role === 'ORIENTADOR') {
+            if (turma.orientadorId !== avaliadorId) {
+                return res.status(403).json({ error: 'Você só pode avaliar a turma que você orienta.' });
+            }
+        }
+
+        // 3. Validar limite de avaliações do avaliador (Regra 3x3) e limite por turma (somente para novas avaliações)
         if (!avaliacaoExistente && role === 'AVALIADOR') {
             const avaliacoesFeitas = await prisma.avaliacao.count({
                 where: { avaliadorId }

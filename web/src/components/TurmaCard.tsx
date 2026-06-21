@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../api/client';
+import { useAuth } from '../contexts/AuthContext';
 import type { Turma } from '../contexts/AuthContext';
 
 interface TurmaCardProps {
@@ -17,6 +18,7 @@ interface TurmaStatus {
 }
 
 export const TurmaCard: React.FC<TurmaCardProps> = ({ turma }) => {
+  const { user } = useAuth();
   const [status, setStatus] = useState<TurmaStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -37,14 +39,15 @@ export const TurmaCard: React.FC<TurmaCardProps> = ({ turma }) => {
   }, [turma.id]);
 
   const handleAvaliar = () => {
-    // Passa templateId via state para evitar hardcode no AvaliacaoForm
     navigate(`/avaliar/${turma.id}`, {
       state: { templateId: turma.templateId }
     });
   };
 
+  const isOrientador = user?.role === 'ORIENTADOR';
   const semTemplate = !turma.templateId;
-  const avaliavel = !loading && !status?.jaAvaliou && status && status.totalAvaliacoes < status.maxAvaliacoes && !semTemplate;
+  const limiteAtingido = !isOrientador && status && status.totalAvaliacoes >= status.maxAvaliacoes;
+  const avaliavel = !loading && !status?.jaAvaliou && status && !limiteAtingido && !semTemplate;
   const podeEditar = !loading && status?.jaAvaliou && status.edicaoAtiva && !semTemplate;
   const habilitado = avaliavel || podeEditar;
 
@@ -67,13 +70,13 @@ export const TurmaCard: React.FC<TurmaCardProps> = ({ turma }) => {
               <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-green-800">
                 Avaliação Concluída
               </span>
-            ) : status.totalAvaliacoes >= status.maxAvaliacoes ? (
+            ) : limiteAtingido ? (
               <span className="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-yellow-800">
                 Limite de Avaliações Atingido
               </span>
             ) : (
               <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-blue-800">
-                Pendente ({status.totalAvaliacoes}/{status.maxAvaliacoes} avaliações)
+                {isOrientador ? 'Pendente' : `Pendente (${status.totalAvaliacoes}/${status.maxAvaliacoes} avaliações)`}
               </span>
             )}
           </div>

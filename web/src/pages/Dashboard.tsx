@@ -22,6 +22,13 @@ export const Dashboard: React.FC = () => {
           <p><strong>Usuário:</strong> {user?.nome}</p>
           <p><strong>Email:</strong> {user?.email}</p>
           <p><strong>Perfil:</strong> {user?.role}</p>
+          {user?.role === 'ORIENTADOR' && (
+            <div className="mt-4">
+              <a href="/ocorrencias" className="inline-block rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700">
+                Minhas Ocorrências
+              </a>
+            </div>
+          )}
         </div>
 
         <h2 className="mb-4 text-xl font-semibold">Minhas Turmas ({turmas.length})</h2>

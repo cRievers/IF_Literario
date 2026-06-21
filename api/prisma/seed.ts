@@ -32,7 +32,7 @@ async function main() {
     data: {
       id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
       nome: 'Coordenação IF Literário',
-      email: 'admin@ifmg.edu.br',
+      email: '0076890@academico.ifmg.edu.br',
       role: Role.ADMIN
     }
   });

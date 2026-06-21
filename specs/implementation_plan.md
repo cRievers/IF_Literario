@@ -68,15 +68,24 @@ O trabalho será dividido em "Sprints" lógicos, abordando Backend e Frontend ju
 
 ---
 
-### Sprint 3: Fluxo do Orientador e Ocorrências
+### ✅ Sprint 3: Fluxo do Orientador e Ocorrências (CONCLUÍDA)
+
+Nesta sprint focamos nas ações específicas do **Orientador**, permitindo que ele avalie a turma que orienta e crie ocorrências.
+
+#### Proposed Changes
 
 **Backend (`api/`)**
-- Implementar `POST /api/ocorrencias` restrito a `ORIENTADOR` e `ADMIN`.
+- [x] `src/routes/ocorrencias.ts`: Criar novo router para ocorrências.
+- [x] `src/routes/ocorrencias.ts`: Implementar `POST /api/ocorrencias` restrito a `ORIENTADOR` e `ADMIN`. O payload receberá `descricao` e, opcionalmente, `turmaId`.
+- [x] `src/routes/ocorrencias.ts`: Implementar `GET /api/ocorrencias/minhas` para o `ORIENTADOR` listar o status de suas ocorrências (`resolvida: boolean`).
+- [x] `src/routes/avaliacoes.ts`: Adaptar o endpoint `POST /api/avaliacoes` para validar a role `ORIENTADOR` (não aplicar a regra de 3 avaliações máximas para ele, mas garantir que ele seja o `orientadorId` da turma e permitir apenas 1 avaliação daquele orientador).
 
 **Frontend (`web/`)**
-- Criar Painel do Orientador listando sua respectiva turma.
-- Tela de Avaliação do Orientador (similar à do avaliador, mas puxando o template específico do orientador).
-- Formulário para submissão de Ocorrências e listagem do status (resolvido/pendente).
+- [x] `src/pages/Dashboard.tsx`: Atualizar a interface para, quando `user.role === 'ORIENTADOR'`, listar apenas as turmas de `user.turmasOrientadas`. (Adicionado link para Minhas Ocorrências)
+- [x] `src/components/TurmaCard.tsx` e `src/pages/AvaliacaoForm.tsx`: O formulário e o card aceitam o fluxo do orientador sem as regras de visitante e registram a submissão corretamente.
+- [x] `src/pages/Ocorrencias.tsx`: Criar tela para listar ocorrências enviadas pelo orientador (com status de Pendente/Resolvida).
+- [x] `src/pages/OcorrenciaForm.tsx` (ou modal dentro de `Ocorrencias.tsx`): Formulário para submeter uma nova ocorrência (campo texto longo para descrição e select opcional para a turma relacionada).
+- [x] `src/App.tsx`: Adicionar rotas para listar ocorrências.
 
 ---
 

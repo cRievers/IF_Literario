@@ -15,9 +15,11 @@ app.use(cors({
 app.use(express.json());
 
 import avaliacoesRoutes from './routes/avaliacoes.js';
+import ocorrenciasRoutes from './routes/ocorrencias.js';
 
 // --- ROTAS ---
 app.use('/api/avaliacoes', avaliacoesRoutes);
+app.use('/api/ocorrencias', ocorrenciasRoutes);
 
 // Rota para buscar o template de avaliação e seus critérios dinâmicos
 app.get('/api/templates/:id', async (req: Request, res: Response, next: NextFunction): Promise<any> => {

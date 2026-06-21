@@ -6,6 +6,8 @@ import { Dashboard } from './pages/Dashboard';
 import { Unauthorized } from './pages/Unauthorized';
 
 import { AvaliacaoForm } from './pages/AvaliacaoForm';
+import { Ocorrencias } from './pages/Ocorrencias';
+import { OcorrenciaForm } from './pages/OcorrenciaForm';
 
 function App() {
   return (
@@ -18,6 +20,8 @@ function App() {
           <Route element={<PrivateRoute />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/avaliar/:id" element={<AvaliacaoForm />} />
+            <Route path="/ocorrencias" element={<Ocorrencias />} />
+            <Route path="/ocorrencias/nova" element={<OcorrenciaForm />} />
             {/* Outras rotas protegidas serão adicionadas aqui nas próximas sprints */}
           </Route>
           

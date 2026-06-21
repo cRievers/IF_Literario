@@ -11,6 +11,7 @@ export const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [resetLoading, setResetLoading] = useState(false);
 
   React.useEffect(() => {
     if (authError) {
@@ -46,6 +47,25 @@ export const Login: React.FC = () => {
       setErrorMsg(err.message || 'Ocorreu um erro ao tentar fazer login.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Envia link de reset de senha para o email informado no campo
+  const handleEsqueciSenha = async () => {
+    if (!email) {
+      setErrorMsg('Digite seu e-mail no campo acima antes de solicitar a redefinição.');
+      return;
+    }
+    setResetLoading(true);
+    setErrorMsg(null);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/trocar-senha`,
+    });
+    setResetLoading(false);
+    if (error) {
+      setErrorMsg(error.message);
+    } else {
+      setSuccessMsg('Link de redefinição enviado! Verifique sua caixa de entrada.');
     }
   };
 
@@ -137,6 +157,14 @@ export const Login: React.FC = () => {
                 <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
               </>
             )}
+          </button>
+          <button
+            type="button"
+            onClick={handleEsqueciSenha}
+            disabled={resetLoading}
+            className="w-full text-center text-sm text-slate-500 hover:text-ifmg-green disabled:opacity-60 transition-colors mt-1"
+          >
+            {resetLoading ? 'Enviando link...' : 'Esqueci minha senha'}
           </button>
         </form>
 

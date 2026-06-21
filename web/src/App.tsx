@@ -8,6 +8,7 @@ import { Unauthorized } from './pages/Unauthorized';
 import { AvaliacaoForm } from './pages/AvaliacaoForm';
 import { Ocorrencias } from './pages/Ocorrencias';
 import { OcorrenciaForm } from './pages/OcorrenciaForm';
+import { TrocarSenhaRedirect } from './pages/TrocarSenhaRedirect';
 
 function App() {
   return (
@@ -16,6 +17,8 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
+          {/* Rota pública — destino do link de reset de senha enviado por e-mail */}
+          <Route path="/trocar-senha" element={<TrocarSenhaRedirect />} />
           
           <Route element={<PrivateRoute />}>
             <Route path="/" element={<Dashboard />} />

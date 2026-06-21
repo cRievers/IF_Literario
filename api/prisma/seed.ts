@@ -4,14 +4,77 @@ import { PrismaClient, TipoCriterio, Role } from '@prisma/client';
 import process from 'node:process';
 import { PrismaPg } from '@prisma/adapter-pg';
 import pg from 'pg';
+import { createClient } from '@supabase/supabase-js';
 
 const connectionString = process.env.DIRECT_URL || process.env.DATABASE_URL;
 const pool = new pg.Pool({ connectionString });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
+// Admin API — requer SUPABASE_SERVICE_ROLE_KEY (nunca expor no frontend)
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  { auth: { autoRefreshToken: false, persistSession: false } }
+);
+
+const SENHA_TEMPORARIA = 'IFLiterario@2025';
+
+/**
+ * Cria (ou reutiliza) um usuário no Supabase Auth e no banco de dados.
+ * Garantia: o ID em public.users é idêntico ao ID em auth.users, eliminando
+ * qualquer dessincronização entre os dois schemas.
+ */
+async function upsertAuthAndDbUser(params: {
+  email: string;
+  nome: string;
+  role: Role;
+}) {
+  const { email, nome, role } = params;
+
+  // 1. Verifica se o usuário já existe no auth.users para não criar duplicata
+  const { data: listData } = await supabaseAdmin.auth.admin.listUsers();
+  const existing = listData?.users?.find(u => u.email === email);
+
+  let authUserId: string;
+
+  if (existing) {
+    authUserId = existing.id;
+    console.log(`  ↩️  Auth user já existe: ${email} (${authUserId})`);
+  } else {
+    // 2. Cria o usuário no Supabase Auth com confirmação automática e senha temporária
+    const { data, error } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password: SENHA_TEMPORARIA,
+      email_confirm: true, // Pula o e-mail de confirmação — usuário pode logar imediatamente
+    });
+    if (error || !data.user) {
+      throw new Error(`Falha ao criar auth user para ${email}: ${error?.message}`);
+    }
+    authUserId = data.user.id;
+    console.log(`  ✅ Auth user criado: ${email} (${authUserId})`);
+  }
+
+  // 3. Upsert em public.users usando o mesmo UUID do auth.users
+  const dbUser = await prisma.user.upsert({
+    where: { email },
+    update: { nome, role, id: authUserId },
+    create: { id: authUserId, email, nome, role },
+  });
+
+  return dbUser;
+}
+
 async function main() {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error(
+      '❌ SUPABASE_SERVICE_ROLE_KEY não configurada no .env!\n' +
+      '   Acesse: Supabase Dashboard → Project Settings → API → service_role'
+    );
+  }
+
   console.log('🌱 Iniciando o seed do banco de dados...');
+  console.log(`🔑 Senha temporária para todos os usuários: "${SENHA_TEMPORARIA}"`);
 
   // 1. Limpeza de tabelas na ordem correta para evitar violações de chaves estrangeiras
   console.log('🧹 Limpando dados antigos...');
@@ -26,61 +89,44 @@ async function main() {
   await prisma.user.deleteMany();
   await prisma.edicao.deleteMany();
 
-  // 2. Criação dos Usuários de Teste (UUIDs estáticos para testes consistentes)
-  console.log('👤 Criando usuários de teste...');
-  const admin = await prisma.user.create({
-    data: {
-      id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
-      nome: 'Coordenação IF Literário',
-      email: '0076890@academico.ifmg.edu.br',
-      role: Role.ADMIN
-    }
+  // 2. Criação dos Usuários — sincroniza auth.users (Supabase) e public.users (Prisma)
+  console.log('👤 Criando usuários...');
+  const admin = await upsertAuthAndDbUser({
+    email: '0076890@academico.ifmg.edu.br',
+    nome: 'Coordenação IF Literário',
+    role: Role.ADMIN,
   });
 
-  const orientador = await prisma.user.create({
-    data: {
-      id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22',
-      nome: 'Prof. Roberto Silva',
-      email: 'roberto.silva@ifmg.edu.br',
-      role: Role.ORIENTADOR
-    }
+  const orientador = await upsertAuthAndDbUser({
+    email: 'rieverscaio@gmail.com',
+    nome: 'Prof. Roberto Silva',
+    role: Role.ORIENTADOR,
   });
 
-  const avaliador1 = await prisma.user.create({
-    data: {
-      id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a31',
-      nome: 'Avaliador Externo 1',
-      email: 'avaliador1@gmail.com',
-      role: Role.AVALIADOR
-    }
+  const avaliador1 = await upsertAuthAndDbUser({
+    email: 'avaliador1@gmail.com',
+    nome: 'Avaliador Externo 1',
+    role: Role.AVALIADOR,
   });
 
-  const avaliador2 = await prisma.user.create({
-    data: {
-      id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a32',
-      nome: 'Avaliador Externo 2',
-      email: 'avaliador2@gmail.com',
-      role: Role.AVALIADOR
-    }
+  const avaliador2 = await upsertAuthAndDbUser({
+    email: 'avaliador2@gmail.com',
+    nome: 'Avaliador Externo 2',
+    role: Role.AVALIADOR,
   });
 
-  const avaliador3 = await prisma.user.create({
-    data: {
-      id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a33',
-      nome: 'Avaliador Externo 3',
-      email: 'avaliador3@gmail.com',
-      role: Role.AVALIADOR
-    }
+  const avaliador3 = await upsertAuthAndDbUser({
+    email: 'avaliador3@gmail.com',
+    nome: 'Avaliador Externo 3',
+    role: Role.AVALIADOR,
   });
 
-  const avaliador4 = await prisma.user.create({
-    data: {
-      id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a34',
-      nome: 'Avaliador Externo 4 (Excesso)',
-      email: 'avaliador4@gmail.com',
-      role: Role.AVALIADOR
-    }
+  const avaliador4 = await upsertAuthAndDbUser({
+    email: 'avaliador4@gmail.com',
+    nome: 'Avaliador Externo 4 (Excesso)',
+    role: Role.AVALIADOR,
   });
+
 
   // 3. Cria a Edição de 2025
   console.log('📅 Criando edição...');

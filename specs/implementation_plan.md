@@ -15,6 +15,11 @@ Este plano detalha a implementação do sistema IF Literário, cobrindo as fases
 
 Nenhuma questão aberta no momento.
 
+> [!NOTE]
+> **Correção pós-Sprint 2**: Identificada falha de design onde `AvaliacaoForm.tsx` usava `TEMPLATE_ID = 1` hardcoded.
+> O schema foi atualizado para incluir `templateId` em `Turma`, e o `templateId` agora flui via `navigation state`
+> do `TurmaCard` → `AvaliacaoForm`, eliminando qualquer suposição sobre IDs do banco.
+
 ## Proposed Changes
 
 O trabalho será dividido em "Sprints" lógicos, abordando Backend e Frontend juntos sempre que possível.
@@ -36,24 +41,30 @@ O trabalho será dividido em "Sprints" lógicos, abordando Backend e Frontend ju
 
 ---
 
-### Sprint 2: Fluxo do Avaliador (O Coração do Sistema)
+### ✅ Sprint 2: Fluxo do Avaliador (CONCLUÍDA + CORRIGIDA)
 
 **Backend (`api/`)**
-- Implementar `GET /api/avaliacoes/turma/:id` (retornar progresso das avaliações de uma turma).
-- Criar utilitário `src/lib/logger.ts` para salvar logs na tabela `LogAuditoria`.
-- Implementar o crítico `POST /api/avaliacoes`:
-  - Garantir idempotência.
-  - Validar regra 3x3 (Avaliador não pode submeter mais que 3 avaliações).
-  - Validar limite por turma (Turma só recebe 3 avaliações de visitantes).
-  - Validar todos os critérios do template e usar transação ACID (`prisma.$transaction`).
+- [x] Implementar `GET /api/avaliacoes/turma/:id` (retornar progresso das avaliações de uma turma).
+- [x] Criar utilitário `src/lib/logger.ts` para salvar logs na tabela `LogAuditoria`.
+- [x] Criar rota `GET /api/templates/:id` para o frontend consumir o barema dinamicamente.
+- [x] Implementar o crítico `POST /api/avaliacoes`:
+  - [x] Garantir idempotência.
+  - [x] Validar regra 3x3 (Avaliador não pode submeter mais que 3 avaliações).
+  - [x] Validar limite por turma (Turma só recebe 3 avaliações de visitantes).
+  - [x] Validar todos os critérios do template e usar transação ACID (`prisma.$transaction`).
+- [x] **[CORREÇÃO]** Adicionar `templateId` em `Turma` no schema — cada turma indica explicitamente qual barema usar.
+- [x] **[CORREÇÃO]** Atualizar `GET /api/me` para incluir `templateId` nas turmas retornadas e filtrar por edição ativa.
+- [x] Atualizar `prisma/seed.ts` para popular `templateId` nas turmas de teste.
 
 **Frontend (`web/`)**
-- Criar o Painel Principal (Avaliador) listando as turmas alocadas.
-- Integrar com `GET /api/me` e `GET /api/avaliacoes/turma/:id` para mostrar o status de cada turma.
-- Criar a Tela de Avaliação (Formulário Dinâmico):
-  - Consumir `GET /api/templates/:id`.
-  - Renderizar os campos condicionalmente (`NUMERICO` -> Slider de 0 a `pesoMaximo`, `BOOLEANO` -> Radio Sim/Não, `TEXTO` -> Textarea).
-  - Implementar lógica de envio conectada ao `POST /api/avaliacoes` e tratamento de erros (ex: turma já avaliada).
+- [x] Criar o Painel Principal (Avaliador) listando as turmas alocadas.
+- [x] Integrar com `GET /api/me` e `GET /api/avaliacoes/turma/:id` para mostrar o status de cada turma.
+- [x] **[CORREÇÃO]** `TurmaCard` passa `templateId` via `navigation state` ao navegar para `/avaliar/:id`.
+- [x] Criar a Tela de Avaliação (Formulário Dinâmico):
+  - [x] Consumir `GET /api/templates/:id` com o ID recebido via `location.state` (nunca hardcoded).
+  - [x] Renderizar os campos condicionalmente (`NUMERICO` -> Slider, `BOOLEANO` -> Radio Sim/Não, `TEXTO` -> Textarea).
+  - [x] Exibir erro descritivo se a turma não tiver template configurado.
+  - [x] Implementar lógica de envio conectada ao `POST /api/avaliacoes` e tratamento de erros.
 
 ---
 

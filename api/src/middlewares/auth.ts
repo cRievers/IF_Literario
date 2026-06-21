@@ -23,9 +23,9 @@ export const requireAuth = async (req: AuthRequest, res: Response, next: NextFun
         return res.status(401).json({ error: 'Token inválido ou expirado' });
     }
 
-    // Buscar usuário no Prisma
+    // Buscar usuário no Prisma usando o e-mail, pois o ID do Supabase pode ser diferente em ambiente de dev
     const dbUser = await prisma.user.findUnique({
-        where: { id: data.user.id }
+        where: { email: data.user.email }
     });
 
     if (!dbUser) {

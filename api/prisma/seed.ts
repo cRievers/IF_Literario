@@ -100,20 +100,79 @@ async function main() {
       criterios: {
         create: [
           // Critérios Numéricos (0 a 10) conforme documento
-          { descricao: '1. Organização, ambientação e decoração da sala', pesoMaximo: 10, tipo: TipoCriterio.NUMERICO },
-          { descricao: '2. Conteúdo apresentado', pesoMaximo: 10, tipo: TipoCriterio.NUMERICO },
-          { descricao: '3. Contemplação dos itens solicitados', pesoMaximo: 10, tipo: TipoCriterio.NUMERICO },
-          { descricao: '4. Produção artística', pesoMaximo: 10, tipo: TipoCriterio.NUMERICO },
-          { descricao: '5. Contexto histórico e filosófico', pesoMaximo: 10, tipo: TipoCriterio.NUMERICO },
-          { descricao: '6. Contexto geográfico', pesoMaximo: 10, tipo: TipoCriterio.NUMERICO },
-          { descricao: '7. Contexto literário e cultural', pesoMaximo: 10, tipo: TipoCriterio.NUMERICO },
-          { descricao: '8. Relação com as Ciências da Natureza, Exatas e/ou Sociais', pesoMaximo: 10, tipo: TipoCriterio.NUMERICO },
-          { descricao: '9. Criatividade e integração da exposição', pesoMaximo: 10, tipo: TipoCriterio.NUMERICO },
-          { descricao: '10. Adequação da linguagem e comunicação com o público', pesoMaximo: 10, tipo: TipoCriterio.NUMERICO },
-          { descricao: '11. Gestão do tempo e percurso da exposição', pesoMaximo: 10, tipo: TipoCriterio.NUMERICO },
+          { 
+            descricao: '1. Organização, ambientação e decoração da sala', 
+            descricaoLonga: 'Ambientação física da sala temática, criatividade nos elementos decorativos e harmonia visual do espaço de exposição.',
+            pesoMaximo: 10, 
+            tipo: TipoCriterio.NUMERICO 
+          },
+          { 
+            descricao: '2. Conteúdo apresentado', 
+            descricaoLonga: 'Profundidade teórica, domínio do tema pelos expositores e exatidão nas informações passadas aos visitantes.',
+            pesoMaximo: 10, 
+            tipo: TipoCriterio.NUMERICO 
+          },
+          { 
+            descricao: '3. Contemplação dos itens solicitados', 
+            descricaoLonga: 'Verificação se os itens obrigatórios estipulados no regulamento do evento foram devidamente exibidos na sala.',
+            pesoMaximo: 10, 
+            tipo: TipoCriterio.NUMERICO 
+          },
+          { 
+            descricao: '4. Produção artística', 
+            descricaoLonga: 'Qualidade estética, capricho e relevância dos trabalhos manuais e artísticos confeccionados pelos próprios estudantes.',
+            pesoMaximo: 10, 
+            tipo: TipoCriterio.NUMERICO 
+          },
+          { 
+            descricao: '5. Contexto histórico e filosófico', 
+            descricaoLonga: 'Pontuação sobre a contextualização histórica da obra e as discussões filosóficas provocadas pelo autor e pelo enredo.',
+            pesoMaximo: 10, 
+            tipo: TipoCriterio.NUMERICO 
+          },
+          { 
+            descricao: '6. Contexto geográfico', 
+            descricaoLonga: 'Exposição e contextualização dos elementos geográficos associados ao cenário ou época da obra analisada.',
+            pesoMaximo: 10, 
+            tipo: TipoCriterio.NUMERICO 
+          },
+          { 
+            descricao: '7. Contexto literário e cultural', 
+            descricaoLonga: 'Detalhamento sobre o movimento literário do livro, a vida do autor e o contexto sociocultural da produção.',
+            pesoMaximo: 10, 
+            tipo: TipoCriterio.NUMERICO 
+          },
+          { 
+            descricao: '8. Relação com as Ciências da Natureza, Exatas e/ou Sociais', 
+            descricaoLonga: 'Integração interdisciplinar demonstrada entre a narrativa literária e áreas científicas, exatas ou sociais aplicadas.',
+            pesoMaximo: 10, 
+            tipo: TipoCriterio.NUMERICO 
+          },
+          { 
+            descricao: '9. Criatividade e integração da exposição', 
+            descricaoLonga: 'Originalidade da proposta da sala e a forma inovadora como os temas do livro foram conectados às apresentações.',
+            pesoMaximo: 10, 
+            tipo: TipoCriterio.NUMERICO 
+          },
+          { 
+            descricao: '10. Adequação da linguagem e comunicação com o público', 
+            descricaoLonga: 'Linguagem apropriada para os visitantes da exposição, clareza na oratória e nível de engajamento do público.',
+            pesoMaximo: 10, 
+            tipo: TipoCriterio.NUMERICO 
+          },
+          { 
+            descricao: '11. Gestão do tempo e percurso da exposição', 
+            descricaoLonga: 'Respeito ao cronograma de tempo da apresentação e organização do fluxo de percurso físico dos visitantes na sala.',
+            pesoMaximo: 10, 
+            tipo: TipoCriterio.NUMERICO 
+          },
           
           // Critério Booleano
-          { descricao: '12. Relação com o curso', tipo: TipoCriterio.BOOLEANO },
+          { 
+            descricao: '12. Relação com o curso', 
+            descricaoLonga: 'Grau de integração entre a obra literária e as diretrizes ou disciplinas do curso técnico dos estudantes.',
+            tipo: TipoCriterio.BOOLEANO 
+          },
         ],
       },
     },
@@ -127,7 +186,12 @@ async function main() {
       descricao: 'Avaliação realizada pelo orientador da própria turma',
       criterios: {
         create: [
-          { descricao: 'Nota de Orientação Geral', pesoMaximo: 10, tipo: TipoCriterio.NUMERICO }
+          { 
+            descricao: 'Nota de Orientação Geral', 
+            descricaoLonga: 'Avaliação do empenho geral da turma, dedicação durante os meses de desenvolvimento e a qualidade final do resultado apresentado.',
+            pesoMaximo: 10, 
+            tipo: TipoCriterio.NUMERICO 
+          }
         ]
       }
     }
@@ -141,7 +205,8 @@ async function main() {
       nome: '1º Ano Informática',
       temaLivro: 'A Odisseia',
       edicaoId: edicao2025.id,
-      orientadorId: orientador.id
+      orientadorId: orientador.id,
+      templateId: templateBarema.id // Barema Geral para visitantes
     }
   });
 
@@ -150,7 +215,8 @@ async function main() {
       id: 't1eebc99-9c0b-4ef8-bb6d-6bb9bd380a02',
       nome: '2º Ano Metalurgia',
       temaLivro: 'Dom Casmurro',
-      edicaoId: edicao2025.id
+      edicaoId: edicao2025.id,
+      templateId: templateBarema.id
     }
   });
 
@@ -159,7 +225,8 @@ async function main() {
       id: 't1eebc99-9c0b-4ef8-bb6d-6bb9bd380a03',
       nome: '3º Ano Administração',
       temaLivro: 'Vidas Secas',
-      edicaoId: edicao2025.id
+      edicaoId: edicao2025.id,
+      templateId: templateBarema.id
     }
   });
 

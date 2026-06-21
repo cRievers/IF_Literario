@@ -47,17 +47,19 @@ model Edicao {
 }
 
 model Turma {
-  id           String      @id @default(uuid())
+  id           String               @id @default(uuid())
   nome         String
   temaLivro    String
   edicaoId     Int
   orientadorId String?
-  
-  edicao       Edicao      @relation(fields: [edicaoId], references: [id])
-  orientador   User?       @relation(fields: [orientadorId], references: [id])
+  templateId   Int?                 // Template de barema usado pelos avaliadores desta turma
+
+  edicao       Edicao               @relation(fields: [edicaoId], references: [id])
+  orientador   User?                @relation(fields: [orientadorId], references: [id])
+  template     TemplateAvaliacao?   @relation(fields: [templateId], references: [id])
   avaliacoes   Avaliacao[]
   ocorrencias  Ocorrencia[]
-  alocacoes    Alocacao[]  @relation("TurmaAlocacoes")
+  alocacoes    Alocacao[]           @relation("TurmaAlocacoes")
 
   @@map("turmas")
 }
@@ -69,16 +71,18 @@ model TemplateAvaliacao {
   descricao   String?
   criterios   Criterio[]
   avaliacoes  Avaliacao[]
+  turmas      Turma[]    // Turmas que usam este template
 
   @@map("templates_avaliacao")
 }
 
 model Criterio {
-  id          Int               @id @default(autoincrement())
-  descricao   String            // Ex: "Acessibilidade e Inclusão", "Criatividade"
-  tipo        TipoCriterio      @default(NUMERICO)
-  pesoMaximo  Float?            // Usado se for NUMERICO (ex: 10)
-  templateId  Int
+  id             Int               @id @default(autoincrement())
+  descricao      String            // Ex: "Acessibilidade e Inclusão", "Criatividade"
+  descricaoLonga String?           // Explicação detalhada sobre as diretrizes do critério
+  tipo           TipoCriterio      @default(NUMERICO)
+  pesoMaximo     Float?            // Usado se for NUMERICO (ex: 10)
+  templateId     Int
   
   template    TemplateAvaliacao @relation(fields: [templateId], references: [id], onDelete: Cascade)
   notas       NotaCriterio[]

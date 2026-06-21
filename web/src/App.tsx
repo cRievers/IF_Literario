@@ -5,6 +5,8 @@ import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { Unauthorized } from './pages/Unauthorized';
 
+import { AvaliacaoForm } from './pages/AvaliacaoForm';
+
 function App() {
   return (
     <AuthProvider>
@@ -15,6 +17,7 @@ function App() {
           
           <Route element={<PrivateRoute />}>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/avaliar/:id" element={<AvaliacaoForm />} />
             {/* Outras rotas protegidas serão adicionadas aqui nas próximas sprints */}
           </Route>
           

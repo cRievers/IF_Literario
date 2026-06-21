@@ -14,7 +14,10 @@ app.use(cors({
 }));
 app.use(express.json());
 
+import avaliacoesRoutes from './routes/avaliacoes.js';
+
 // --- ROTAS ---
+app.use('/api/avaliacoes', avaliacoesRoutes);
 
 // Rota para buscar o template de avaliação e seus critérios dinâmicos
 app.get('/api/templates/:id', async (req: Request, res: Response, next: NextFunction): Promise<any> => {
@@ -49,20 +52,35 @@ app.get('/api/me', requireAuth, async (req: AuthRequest, res: Response, next: Ne
         const userId = req.user.id;
         const role = req.user.role;
 
+        // Campos selecionados de turma — inclui templateId para o frontend saber qual barema buscar
+        const turmaSelect = {
+            id: true,
+            nome: true,
+            temaLivro: true,
+            templateId: true,
+            edicao: { select: { ano: true, ativo: true } }
+        };
+
         let turmas: any[] = [];
 
         if (role === 'AVALIADOR') {
             const alocacoes = await prisma.alocacao.findMany({
-                where: { avaliadorId: userId },
-                include: { turma: true }
+                where: {
+                    avaliadorId: userId,
+                    turma: { edicao: { ativo: true } } // Apenas edição ativa
+                },
+                include: { turma: { select: turmaSelect } }
             });
             turmas = alocacoes.map(a => a.turma);
         } else if (role === 'ORIENTADOR') {
             turmas = await prisma.turma.findMany({
-                where: { orientadorId: userId }
+                where: { orientadorId: userId, edicao: { ativo: true } },
+                select: turmaSelect
             });
         } else if (role === 'ADMIN') {
-            turmas = await prisma.turma.findMany();
+            turmas = await prisma.turma.findMany({
+                select: turmaSelect
+            });
         }
 
         return res.json({

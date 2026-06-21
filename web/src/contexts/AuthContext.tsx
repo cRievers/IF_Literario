@@ -3,6 +3,14 @@ import { supabase } from '../lib/supabase';
 import { apiClient } from '../api/client';
 import type { Session } from '@supabase/supabase-js';
 
+export type Turma = {
+  id: string;
+  nome: string;
+  temaLivro: string;
+  templateId: number | null;
+  edicao?: { ano: number; ativo: boolean };
+};
+
 type UserProfile = {
   id: string;
   nome: string;
@@ -13,8 +21,9 @@ type UserProfile = {
 type AuthContextType = {
   session: Session | null;
   user: UserProfile | null;
-  turmas: any[];
+  turmas: Turma[];
   isLoading: boolean;
+  authError: string | null;
   signOut: () => Promise<void>;
 };
 
@@ -23,18 +32,25 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [turmas, setTurmas] = useState<any[]>([]);
+  const [turmas, setTurmas] = useState<Turma[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   const fetchProfile = async () => {
     try {
       const data = await apiClient('/api/me');
       setUser(data.user);
       setTurmas(data.turmas);
-    } catch (error) {
+      setAuthError(null);
+    } catch (error: any) {
       console.error('Erro ao buscar perfil:', error);
+      setAuthError(error.message || 'Erro ao buscar perfil');
       setUser(null);
       setTurmas([]);
+      // Se não tem perfil no banco, faz logoff no Supabase para não ficar travado
+      await supabase.auth.signOut();
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -66,7 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, turmas, isLoading, signOut }}>
+    <AuthContext.Provider value={{ session, user, turmas, isLoading, authError, signOut }}>
       {children}
     </AuthContext.Provider>
   );

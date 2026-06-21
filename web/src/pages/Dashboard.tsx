@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { TurmaCard } from '../components/TurmaCard';
 
 export const Dashboard: React.FC = () => {
   const { user, turmas, signOut } = useAuth();
@@ -25,13 +26,11 @@ export const Dashboard: React.FC = () => {
 
         <h2 className="mb-4 text-xl font-semibold">Minhas Turmas ({turmas.length})</h2>
         {turmas.length > 0 ? (
-          <ul className="space-y-2">
+          <div className="space-y-4">
             {turmas.map((t) => (
-              <li key={t.id} className="rounded border p-3">
-                {t.nome} - {t.temaLivro}
-              </li>
+              <TurmaCard key={t.id} turma={t} />
             ))}
-          </ul>
+          </div>
         ) : (
           <p className="text-gray-500">Nenhuma turma alocada.</p>
         )}

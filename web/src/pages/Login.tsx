@@ -5,12 +5,20 @@ import { supabase } from '../lib/supabase';
 import { Mail, Lock, BookOpen, AlertCircle, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
 
 export const Login: React.FC = () => {
-  const { user } = useAuth();
+  const { user, authError } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (authError) {
+      setErrorMsg(authError);
+      setSuccessMsg(null);
+      setLoading(false);
+    }
+  }, [authError]);
 
   if (user) {
     return <Navigate to="/" replace />;

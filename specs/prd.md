@@ -29,8 +29,6 @@ A API deve ser a única fonte da verdade para o processamento de notas.
 
 $$Nota Final = \left( \frac{M\acute{e}dia\ Avaliadores + Nota\ Orientador}{2} \right) \times 100$$
 
-
-
 *(Nota técnica: A API deve tratar os limites matemáticos para que o resultado final reflita com exatidão a escala de 0 a 100%).*
 
 ### 4. Arquitetura e Stack

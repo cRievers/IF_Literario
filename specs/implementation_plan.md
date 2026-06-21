@@ -19,20 +19,20 @@ Nenhuma questão aberta no momento.
 
 O trabalho será dividido em "Sprints" lógicos, abordando Backend e Frontend juntos sempre que possível.
 
-### Sprint 1: Autenticação, RBAC e Infraestrutura Base
+### ✅ Sprint 1: Autenticação, RBAC e Infraestrutura Base (CONCLUÍDA)
 
 **Backend (`api/`)**
-- Criar a instância global do Prisma em `src/lib/prisma.ts`.
-- Enriquecer `requireAuth` (`src/middlewares/auth.ts`) para buscar o usuário no Prisma e anexar a `role`.
-- Criar middleware de autorização `requireRole` (`src/middlewares/roles.ts`).
-- Implementar `GET /api/me` para retornar o perfil completo e as turmas associadas (dependendo da role).
-- Adicionar CORS restrito e tratamento de erros global.
+- [x] Criar a instância global do Prisma em `src/lib/prisma.ts`.
+- [x] Enriquecer `requireAuth` (`src/middlewares/auth.ts`) para buscar o usuário no Prisma e anexar a `role`.
+- [x] Criar middleware de autorização `requireRole` (`src/middlewares/roles.ts`).
+- [x] Implementar `GET /api/me` para retornar o perfil completo e as turmas associadas (dependendo da role).
+- [x] Adicionar CORS restrito e tratamento de erros global.
 
 **Frontend (`web/`)**
-- Configurar React Router DOM e estrutura básica de navegação.
-- Implementar o `AuthContext` para gerenciar estado de login persistente e ouvir `onAuthStateChange` do Supabase.
-- Criar componente `PrivateRoute` para proteger rotas baseado em autenticação e `role`.
-- Criar um cliente HTTP (`src/api/client.ts`) configurado para injetar o token JWT automaticamente.
+- [x] Configurar React Router DOM e estrutura básica de navegação.
+- [x] Implementar o `AuthContext` para gerenciar estado de login persistente e ouvir `onAuthStateChange` do Supabase.
+- [x] Criar componente `PrivateRoute` para proteger rotas baseado em autenticação e `role`.
+- [x] Criar um cliente HTTP (`src/api/client.ts`) configurado para injetar o token JWT automaticamente.
 
 ---
 

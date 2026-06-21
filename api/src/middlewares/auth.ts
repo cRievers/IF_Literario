@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { supabase } from '../lib/supabase.js';
+import { prisma } from '../lib/prisma.js';
 
 // Estendendo o Request do Express para incluir o usuário
 export interface AuthRequest extends Request {
@@ -22,7 +23,16 @@ export const requireAuth = async (req: AuthRequest, res: Response, next: NextFun
         return res.status(401).json({ error: 'Token inválido ou expirado' });
     }
 
-    // Anexa os dados do usuário na requisição para a rota usar
-    req.user = data.user;
+    // Buscar usuário no Prisma
+    const dbUser = await prisma.user.findUnique({
+        where: { id: data.user.id }
+    });
+
+    if (!dbUser) {
+        return res.status(401).json({ error: 'Usuário não encontrado no banco de dados' });
+    }
+
+    // Anexa os dados do banco de dados na requisição para a rota usar
+    req.user = dbUser;
     next();
-};
+};

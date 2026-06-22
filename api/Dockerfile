@@ -15,11 +15,13 @@ COPY prisma.config.ts ./
 COPY prisma ./prisma
 COPY src ./src
 
+# Gera o Prisma Client a partir do schema
+ENV DIRECT_URL="postgresql://dummy:dummy@localhost:5432/dummy"
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
+RUN npx prisma generate
+
 # Compila TypeScript → dist/
 RUN npm run build
-
-# Gera o Prisma Client a partir do schema
-RUN npx prisma generate
 
 # ── Estágio 2: runtime ────────────────────────────────────────────────────────
 FROM node:22-alpine AS runtime

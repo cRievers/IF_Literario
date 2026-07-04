@@ -7,8 +7,19 @@ import { requireAuth, AuthRequest } from './middlewares/auth.js';
 const app = express();
 
 // CORS Restrito (apenas frontend do projeto)
+// FRONTEND_URL pode conter múltiplas origens separadas por vírgula
+// Ex: https://app.run.app,http://localhost:5173
+const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
+    .split(',')
+    .map(url => url.trim());
+
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: (origin, callback) => {
+        // Permite requisições sem origin (ex: curl, Postman, mobile)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin)) return callback(null, true);
+        callback(new Error(`Origem não permitida pelo CORS: ${origin}`));
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));

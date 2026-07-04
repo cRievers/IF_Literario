@@ -10,15 +10,11 @@ RUN npm ci
 
 COPY . .
 
-# VITE_API_URL é injetada em build-time via ARG → ENV
-# No Cloud Run, passe --build-arg VITE_API_URL=https://api-xxxxx.run.app
-ARG VITE_SUPABASE_URL
-ARG VITE_SUPABASE_ANON_KEY
-ARG VITE_API_URL
-
-ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
-ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
-ENV VITE_API_URL=$VITE_API_URL
+# Variáveis embutidas em build-time pelo Vite (não funcionam como env vars de runtime no Cloud Run)
+# VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY são credenciais públicas — seguro hardcodar
+ENV VITE_SUPABASE_URL="https://hbulqhysiquorurpuviu.supabase.co"
+ENV VITE_SUPABASE_ANON_KEY="sb_publishable_oHoo9Almfw-szuDwhBMZzw_elL3OQuN"
+ENV VITE_API_URL="https://if-literario-798700706860.southamerica-east1.run.app"
 
 RUN npm run build
 

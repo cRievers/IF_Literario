@@ -16,6 +16,8 @@ COPY prisma ./prisma
 COPY src ./src
 
 # Gera o Prisma Client a partir do schema
+ENV DIRECT_URL="postgresql://dummy:dummy@localhost:5432/dummy"
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 RUN npx prisma generate
 
 # Compila TypeScript → dist/

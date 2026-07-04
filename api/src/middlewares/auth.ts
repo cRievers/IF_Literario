@@ -35,4 +35,16 @@ export const requireAuth = async (req: AuthRequest, res: Response, next: NextFun
     // Anexa os dados do banco de dados na requisição para a rota usar
     req.user = dbUser;
     next();
+};
+
+export const requireRole = (roles: string[]) => {
+    return (req: AuthRequest, res: Response, next: NextFunction) => {
+        if (!req.user) {
+            return res.status(401).json({ error: 'Não autorizado' });
+        }
+        if (!roles.includes(req.user.role)) {
+            return res.status(403).json({ error: 'Acesso negado' });
+        }
+        next();
+    };
 };

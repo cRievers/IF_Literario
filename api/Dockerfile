@@ -15,11 +15,11 @@ COPY prisma.config.ts ./
 COPY prisma ./prisma
 COPY src ./src
 
-# Compila TypeScript → dist/
-RUN npm run build
-
 # Gera o Prisma Client a partir do schema
 RUN npx prisma generate
+
+# Compila TypeScript → dist/
+RUN npm run build
 
 # ── Estágio 2: runtime ────────────────────────────────────────────────────────
 FROM node:22-alpine AS runtime

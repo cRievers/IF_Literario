@@ -73,7 +73,7 @@ app.get('/api/me', requireAuth, async (req: AuthRequest, res: Response, next: Ne
                 },
                 include: { turma: { select: turmaSelect } }
             });
-            turmas = alocacoes.map(a => a.turma);
+            turmas = alocacoes.map((a: any) => a.turma);
         } else if (role === 'ORIENTADOR') {
             turmas = await prisma.turma.findMany({
                 where: { orientadorId: userId, edicao: { ativo: true } },

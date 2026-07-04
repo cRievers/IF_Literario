@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { TurmaCard } from '../components/TurmaCard';
 import { TrocarSenhaModal } from '../components/TrocarSenhaModal';
+import { AdminDashboard } from './AdminDashboard';
 
 export const Dashboard: React.FC = () => {
   const { user, turmas, signOut } = useAuth();
@@ -42,15 +43,21 @@ export const Dashboard: React.FC = () => {
           )}
         </div>
 
-        <h2 className="mb-4 text-xl font-semibold">Minhas Turmas ({turmas.length})</h2>
-        {turmas.length > 0 ? (
-          <div className="space-y-4">
-            {turmas.map((t) => (
-              <TurmaCard key={t.id} turma={t} />
-            ))}
-          </div>
+        {user?.role === 'ADMIN' ? (
+          <AdminDashboard />
         ) : (
-          <p className="text-gray-500">Nenhuma turma alocada.</p>
+          <>
+            <h2 className="mb-4 text-xl font-semibold">Minhas Turmas ({turmas.length})</h2>
+            {turmas.length > 0 ? (
+              <div className="space-y-4">
+                {turmas.map((t) => (
+                  <TurmaCard key={t.id} turma={t} />
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500">Nenhuma turma alocada.</p>
+            )}
+          </>
         )}
       </div>
     </div>

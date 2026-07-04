@@ -4,6 +4,22 @@ import { requireAuth, requireRole } from '../middlewares/auth.js';
 
 const router = Router();
 
+// GET /api/alocacoes - Listar alocações (Apenas ADMIN)
+router.get('/', requireAuth, requireRole(['ADMIN']), async (_req: Request, res: Response, next: NextFunction): Promise<any> => {
+    try {
+        const alocacoes = await prisma.alocacao.findMany({
+            include: {
+                avaliador: { select: { nome: true, email: true } },
+                turma: { select: { nome: true } },
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+        return res.json(alocacoes);
+    } catch (error) {
+        next(error);
+    }
+});
+
 // POST /api/alocacoes - Criar alocação (Apenas ADMIN)
 router.post('/', requireAuth, requireRole(['ADMIN']), async (req: Request, res: Response, next: NextFunction): Promise<any> => {
     try {

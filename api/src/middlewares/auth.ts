@@ -23,16 +23,28 @@ export const requireAuth = async (req: AuthRequest, res: Response, next: NextFun
         return res.status(401).json({ error: 'Token inválido ou expirado' });
     }
 
-    // Buscar usuário no Prisma usando o e-mail, pois o ID do Supabase pode ser diferente em ambiente de dev
-    const dbUser = await prisma.user.findUnique({
-        where: { email: data.user.email }
+    // Buscar usuário no Prisma — exclui usuários deletados (soft delete)
+    const dbUser = await prisma.user.findFirst({
+        where: { email: data.user.email, deletedAt: null }
     });
 
     if (!dbUser) {
-        return res.status(401).json({ error: 'Usuário não encontrado no banco de dados' });
+        return res.status(401).json({ error: 'Usuário não encontrado ou inativo' });
     }
 
     // Anexa os dados do banco de dados na requisição para a rota usar
     req.user = dbUser;
     next();
+};
+
+export const requireRole = (roles: string[]) => {
+    return (req: AuthRequest, res: Response, next: NextFunction) => {
+        if (!req.user) {
+            return res.status(401).json({ error: 'Não autorizado' });
+        }
+        if (!roles.includes(req.user.role)) {
+            return res.status(403).json({ error: 'Acesso negado' });
+        }
+        next();
+    };
 };

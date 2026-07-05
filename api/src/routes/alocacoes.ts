@@ -21,7 +21,6 @@ router.get('/', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest, re
             },
             orderBy: { createdAt: 'desc' }
         });
-
         return res.json(alocacoes);
     } catch (error) {
         next(error);

@@ -27,34 +27,21 @@ app.use(express.json());
 
 import avaliacoesRoutes from './routes/avaliacoes.js';
 import ocorrenciasRoutes from './routes/ocorrencias.js';
+import resultadosRoutes from './routes/resultados.js';
+import turmasRoutes from './routes/turmas.js';
+import alocacoesRoutes from './routes/alocacoes.js';
+import templatesRoutes from './routes/templates.js';
+import usuariosRoutes from './routes/usuarios.js';
 
 // --- ROTAS ---
 app.use('/api/avaliacoes', avaliacoesRoutes);
 app.use('/api/ocorrencias', ocorrenciasRoutes);
+app.use('/api/resultados', resultadosRoutes);
+app.use('/api/turmas', turmasRoutes);
+app.use('/api/alocacoes', alocacoesRoutes);
+app.use('/api/templates', templatesRoutes);
+app.use('/api/usuarios', usuariosRoutes);
 
-// Rota para buscar o template de avaliação e seus critérios dinâmicos
-app.get('/api/templates/:id', async (req: Request, res: Response, next: NextFunction): Promise<any> => {
-    try {
-        const { id } = req.params;
-
-        const template = await prisma.templateAvaliacao.findUnique({
-            where: { id: Number(id) },
-            include: {
-                criterios: {
-                    orderBy: { id: 'asc' } // Mantém a ordem correta dos critérios
-                }
-            }
-        });
-
-        if (!template) {
-            return res.status(404).json({ error: 'Template não encontrado' });
-        }
-
-        return res.json(template);
-    } catch (error) {
-        next(error);
-    }
-});
 
 app.get('/api/me', requireAuth, async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {
     try {
@@ -84,7 +71,7 @@ app.get('/api/me', requireAuth, async (req: AuthRequest, res: Response, next: Ne
                 },
                 include: { turma: { select: turmaSelect } }
             });
-            turmas = alocacoes.map(a => a.turma);
+            turmas = alocacoes.map((a: any) => a.turma);
         } else if (role === 'ORIENTADOR') {
             turmas = await prisma.turma.findMany({
                 where: { orientadorId: userId, edicao: { ativo: true } },

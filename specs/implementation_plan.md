@@ -92,17 +92,20 @@ Nesta sprint focamos nas ações específicas do **Orientador**, permitindo que 
 ### Sprint 4: Resultados, Motor de Cálculo e Painel Admin
 
 **Backend (`api/`)**
-- Implementar `GET /api/resultados/campea` (Restrito a `ADMIN`). Média simples das avaliações dos visitantes. O critério booleano será tratado com peso 10 (se verdadeiro) ou 0 (se falso).
-- Implementar `GET /api/resultados/consolidado` (Restrito a `ADMIN`). Cálculo da nota final cruzando visitantes e orientador.
-- Implementar Endpoints CRUD básicos (Restritos a `ADMIN`):
-  - `POST /api/turmas` e `PUT /api/turmas/:id`
-  - `POST /api/alocacoes` e `DELETE /api/alocacoes/:id`
-  - `PUT /api/templates/:id`
+- [x] Implementar `GET /api/resultados/campea` (Restrito a `ADMIN`). Média simples das avaliações dos visitantes. O critério booleano será tratado com peso 10 (se verdadeiro) ou 0 (se falso).
+- [x] Implementar `GET /api/resultados/consolidado` (Restrito a `ADMIN`). Cálculo da nota final cruzando visitantes e orientador.
+- [x] Implementar Endpoints CRUD básicos (Restritos a `ADMIN`):
+  - [x] `POST /api/turmas` e `PUT /api/turmas/:id`
+  - [x] `POST /api/alocacoes` e `DELETE /api/alocacoes/:id`
+  - [x] `PUT /api/templates/:id`
 
 **Frontend (`web/`)**
-- Painel Administrativo com Abas (Resultados, Turmas, Avaliadores, Ocorrências).
-- Tela de Ranking: Exibir de forma visual a Turma Campeã e o consolidado.
-- Interface CRUD: Listagens e formulários simplificados para gerenciar edições, turmas e alocações.
+- [x] Painel Administrativo com Abas (Resultados, Turmas, Avaliadores, Ocorrências).
+- [x] Tela de Ranking: Exibir de forma visual a Turma Campeã e o consolidado.
+- [x] Interface CRUD: Listagens e formulários simplificados para gerenciar edições, turmas e alocações.
+- [x] Exportação de Planilha: Adicionar suporte para geração de arquivos `.xlsx` (utilizando a biblioteca `xlsx`) e incluir botão de exportação das notas consolidadas na aba de resultados do administrador.
+
+---
 
 ## Verification Plan
 

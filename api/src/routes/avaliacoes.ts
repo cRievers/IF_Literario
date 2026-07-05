@@ -29,11 +29,11 @@ router.get('/turma/:id', requireAuth, async (req: AuthRequest, res: Response, ne
             return res.status(404).json({ error: 'Turma não encontrada' });
         }
 
-        const avaliacoesVisitantes = turma.avaliacoes.filter(a => a.avaliador.role === 'AVALIADOR');
+        const avaliacoesVisitantes = turma.avaliacoes.filter((a: any) => a.avaliador.role === 'AVALIADOR');
         const totalAvaliacoes = avaliacoesVisitantes.length;
         const maxAvaliacoes = 3;
 
-        const minhaAvaliacao = turma.avaliacoes.find(a => a.avaliadorId === userId);
+        const minhaAvaliacao = turma.avaliacoes.find((a: any) => a.avaliadorId === userId);
         const jaAvaliou = !!minhaAvaliacao;
 
         let avaliacaoData = null;
@@ -41,7 +41,7 @@ router.get('/turma/:id', requireAuth, async (req: AuthRequest, res: Response, ne
             avaliacaoData = {
                 id: minhaAvaliacao.id,
                 comentario: minhaAvaliacao.comentario,
-                notas: minhaAvaliacao.notas.map(n => ({
+                notas: minhaAvaliacao.notas.map((n: any) => ({
                     criterioId: n.criterioId,
                     valor: n.valorNumerico !== null ? n.valorNumerico : (n.valorBooleano !== null ? n.valorBooleano : n.valorTexto)
                 }))
@@ -174,7 +174,7 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response, next: Next
         }
 
         // 5. Transação ACID
-        const novaAvaliacao = await prisma.$transaction(async (tx) => {
+        const novaAvaliacao = await prisma.$transaction(async (tx: any) => {
             if (avaliacaoExistente) {
                 // Remove notas antigas
                 await tx.notaCriterio.deleteMany({

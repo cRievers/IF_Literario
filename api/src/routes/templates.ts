@@ -28,6 +28,30 @@ router.get('/', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest, re
     }
 });
 
+// GET /api/templates/:id - Buscar template e seus critérios dinâmicos
+router.get('/:id', requireAuth, async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {
+    try {
+        const { id } = req.params;
+
+        const template = await prisma.templateAvaliacao.findUnique({
+            where: { id: Number(id) },
+            include: {
+                criterios: {
+                    orderBy: { id: 'asc' } // Mantém a ordem correta dos critérios
+                }
+            }
+        });
+
+        if (!template) {
+            return res.status(404).json({ error: 'Template não encontrado' });
+        }
+
+        return res.json(template);
+    } catch (error) {
+        next(error);
+    }
+});
+
 // PUT /api/templates/:id - Restrito a ADMIN
 // Atualiza um template e seus critérios com travas de segurança.
 router.put('/:id', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {

@@ -83,8 +83,10 @@ model Criterio {
   descricaoLonga String?           // Explicação detalhada sobre as diretrizes do critério
   tipo           TipoCriterio      @default(NUMERICO)
   pesoMaximo     Float?            // Usado se for NUMERICO (ex: 10)
+  faixasNota     String[]          // Faixas de orientação de nota para o avaliador (ex: "0 a 2: Comunicação confusa...")
+  ativo          Boolean           @default(true) // Soft delete — false = inativo (preserva notas históricas)
   templateId     Int
-  
+
   template    TemplateAvaliacao @relation(fields: [templateId], references: [id], onDelete: Cascade)
   notas       NotaCriterio[]
 

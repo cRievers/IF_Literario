@@ -7,6 +7,7 @@ interface Criterio {
   descricaoLonga?: string | null;
   tipo: string;
   pesoMaximo?: number | null;
+  faixasNota: string[];
 }
 
 interface TemplateAvaliacao {
@@ -27,6 +28,7 @@ export const TemplatesTab: React.FC = () => {
   const [formNome, setFormNome] = useState('');
   const [formDescricao, setFormDescricao] = useState('');
   const [formCriterios, setFormCriterios] = useState<Criterio[]>([]);
+  const [salvando, setSalvando] = useState(false);
 
   const fetchTemplates = async () => {
     setLoading(true);
@@ -49,13 +51,16 @@ export const TemplatesTab: React.FC = () => {
     setEditandoTemplate(tmpl);
     setFormNome(tmpl.nome);
     setFormDescricao(tmpl.descricao || '');
-    setFormCriterios(tmpl.criterios.map(c => ({ ...c })));
+    setFormCriterios(tmpl.criterios.map(c => ({
+      ...c,
+      faixasNota: c.faixasNota ?? [],
+    })));
   };
 
   const handleAddCriterio = () => {
     setFormCriterios([
       ...formCriterios,
-      { id: null, descricao: '', descricaoLonga: '', tipo: 'NUMERICO', pesoMaximo: 10 }
+      { id: null, descricao: '', descricaoLonga: '', tipo: 'NUMERICO', pesoMaximo: 10, faixasNota: [] }
     ]);
   };
 
@@ -69,9 +74,35 @@ export const TemplatesTab: React.FC = () => {
     setFormCriterios(updated);
   };
 
+  // Faixas de nota
+  const handleAddFaixa = (criterioIdx: number) => {
+    const updated = [...formCriterios];
+    updated[criterioIdx] = {
+      ...updated[criterioIdx],
+      faixasNota: [...(updated[criterioIdx].faixasNota ?? []), ''],
+    };
+    setFormCriterios(updated);
+  };
+
+  const handleFaixaChange = (criterioIdx: number, faixaIdx: number, value: string) => {
+    const updated = [...formCriterios];
+    const faixas = [...(updated[criterioIdx].faixasNota ?? [])];
+    faixas[faixaIdx] = value;
+    updated[criterioIdx] = { ...updated[criterioIdx], faixasNota: faixas };
+    setFormCriterios(updated);
+  };
+
+  const handleRemoveFaixa = (criterioIdx: number, faixaIdx: number) => {
+    const updated = [...formCriterios];
+    const faixas = (updated[criterioIdx].faixasNota ?? []).filter((_, i) => i !== faixaIdx);
+    updated[criterioIdx] = { ...updated[criterioIdx], faixasNota: faixas };
+    setFormCriterios(updated);
+  };
+
   const handleSalvarTemplate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editandoTemplate) return;
+    setSalvando(true);
 
     try {
       await apiClient(`/api/templates/${editandoTemplate.id}`, {
@@ -87,6 +118,8 @@ export const TemplatesTab: React.FC = () => {
       fetchTemplates();
     } catch (err: any) {
       alert(`Erro ao salvar template: ${err.message}`);
+    } finally {
+      setSalvando(false);
     }
   };
 
@@ -103,7 +136,8 @@ export const TemplatesTab: React.FC = () => {
       <div>
         <h2 className="text-xl font-bold text-gray-800">📋 Baremas de Avaliação (Templates Dinâmicos)</h2>
         <p className="text-sm text-gray-600 mt-1">
-          Gerencie os formulários utilizados pelos avaliadores visitantes e orientadores. Possui trava de segurança para impedir a remoção de critérios com notas históricas.
+          Gerencie os formulários utilizados pelos avaliadores visitantes e orientadores. Critérios com notas históricas
+          são <strong>inativados</strong> (não excluídos) para preservar a integridade das avaliações.
         </p>
       </div>
 
@@ -154,9 +188,10 @@ export const TemplatesTab: React.FC = () => {
                 </button>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-5">
                 {formCriterios.map((crit, idx) => (
                   <div key={idx} className="rounded-lg border border-gray-200 p-4 bg-gray-50 relative">
+                    {/* Linha 1: Descrição, Tipo, Peso */}
                     <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
                       <div className="w-full md:w-1/2">
                         <label className="block text-xs font-semibold text-gray-600 mb-1">Descrição do Critério</label>
@@ -194,6 +229,8 @@ export const TemplatesTab: React.FC = () => {
                         </div>
                       )}
                     </div>
+
+                    {/* Linha 2: Descrição Longa */}
                     <div className="mt-3">
                       <label className="block text-xs font-semibold text-gray-600 mb-1">Instruções Detalhadas (Descrição Longa)</label>
                       <input
@@ -204,15 +241,65 @@ export const TemplatesTab: React.FC = () => {
                         className="w-full rounded-md border border-gray-300 p-2 text-sm bg-white focus:border-indigo-500 focus:ring-indigo-500"
                       />
                     </div>
+
+                    {/* Linha 3: Faixas de Nota */}
+                    <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="text-xs font-bold text-amber-800 uppercase tracking-wide">
+                          🎯 Faixas de Nota — Orientação para o Avaliador
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => handleAddFaixa(idx)}
+                          className="rounded bg-amber-100 border border-amber-300 px-2 py-0.5 text-xs font-bold text-amber-700 hover:bg-amber-200"
+                        >
+                          + Faixa
+                        </button>
+                      </div>
+                      {(crit.faixasNota ?? []).length === 0 ? (
+                        <p className="text-xs text-amber-600 italic">
+                          Nenhuma faixa cadastrada. Clique em "+ Faixa" para adicionar orientações de nota.
+                        </p>
+                      ) : (
+                        <div className="space-y-1.5">
+                          {(crit.faixasNota ?? []).map((faixa, faixaIdx) => (
+                            <div key={faixaIdx} className="flex items-center gap-2">
+                              <input
+                                type="text"
+                                value={faixa}
+                                onChange={(e) => handleFaixaChange(idx, faixaIdx, e.target.value)}
+                                placeholder={`Ex: ${faixaIdx * 2} a ${faixaIdx * 2 + 1} — Descrição da faixa`}
+                                className="flex-1 rounded border border-amber-300 bg-white p-1.5 text-xs focus:border-amber-500 focus:ring-amber-500"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveFaixa(idx, faixaIdx)}
+                                className="text-xs text-red-500 hover:text-red-700 font-bold px-1"
+                                title="Remover faixa"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Ação: Remover Critério */}
                     <div className="mt-3 flex justify-end">
                       <button
                         type="button"
                         onClick={() => handleRemoveCriterio(idx)}
                         className="text-xs font-bold text-red-600 hover:text-red-800"
                       >
-                        Remover Critério
+                        {crit.id ? '⚠ Remover Critério' : 'Remover Critério'}
                       </button>
                     </div>
+                    {crit.id && (
+                      <p className="mt-1 text-right text-xs text-gray-400 italic">
+                        Se houver notas históricas, será inativado em vez de excluído.
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>
@@ -222,15 +309,17 @@ export const TemplatesTab: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setEditandoTemplate(null)}
-                className="rounded bg-gray-100 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
+                disabled={salvando}
+                className="rounded bg-gray-100 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 disabled:opacity-50"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
-                className="rounded bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-700 shadow"
+                disabled={salvando}
+                className="rounded bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-700 shadow disabled:opacity-60"
               >
-                Salvar Barema
+                {salvando ? 'Salvando...' : 'Salvar Barema'}
               </button>
             </div>
           </form>
@@ -253,11 +342,23 @@ export const TemplatesTab: React.FC = () => {
                 </h4>
                 <div className="space-y-2 mb-6 max-h-60 overflow-y-auto pr-2">
                   {tmpl.criterios.map((c) => (
-                    <div key={c.id} className="rounded border border-gray-100 p-2.5 bg-gray-50 text-xs flex items-center justify-between">
-                      <span className="font-medium text-gray-800">{c.descricao}</span>
-                      <span className="font-bold text-gray-600 bg-white px-1.5 py-0.5 rounded border border-gray-200">
-                        {c.tipo === 'NUMERICO' ? `Max: ${c.pesoMaximo} pts` : c.tipo}
-                      </span>
+                    <div key={c.id} className="rounded border border-gray-100 p-2.5 bg-gray-50 text-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-gray-800">{c.descricao}</span>
+                        <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                          {(c.faixasNota?.length ?? 0) > 0 && (
+                            <span
+                              title={`${c.faixasNota.length} faixa(s) de nota`}
+                              className="font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200"
+                            >
+                              🎯 {c.faixasNota.length}
+                            </span>
+                          )}
+                          <span className="font-bold text-gray-600 bg-white px-1.5 py-0.5 rounded border border-gray-200">
+                            {c.tipo === 'NUMERICO' ? `Max: ${c.pesoMaximo} pts` : c.tipo}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>

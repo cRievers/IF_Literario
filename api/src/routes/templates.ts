@@ -7,12 +7,13 @@ import { logAudit } from '../lib/logger.js';
 const router = Router();
 
 // GET /api/templates - Restrito a ADMIN
-// Retorna a lista de todos os templates com seus critérios.
+// Retorna a lista de todos os templates com seus critérios ativos.
 router.get('/', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {
     try {
         const templates = await prisma.templateAvaliacao.findMany({
             include: {
                 criterios: {
+                    where: { ativo: true }, // Apenas critérios ativos
                     orderBy: { id: 'asc' }
                 },
                 _count: {
@@ -28,7 +29,7 @@ router.get('/', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest, re
     }
 });
 
-// GET /api/templates/:id - Buscar template e seus critérios dinâmicos
+// GET /api/templates/:id - Buscar template e seus critérios dinâmicos (apenas ativos)
 router.get('/:id', requireAuth, async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {
     try {
         const { id } = req.params;
@@ -37,7 +38,8 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res: Response, next: Ne
             where: { id: Number(id) },
             include: {
                 criterios: {
-                    orderBy: { id: 'asc' } // Mantém a ordem correta dos critérios
+                    where: { ativo: true }, // Apenas critérios ativos
+                    orderBy: { id: 'asc' }
                 }
             }
         });
@@ -53,7 +55,7 @@ router.get('/:id', requireAuth, async (req: AuthRequest, res: Response, next: Ne
 });
 
 // PUT /api/templates/:id - Restrito a ADMIN
-// Atualiza um template e seus critérios com travas de segurança.
+// Atualiza um template e seus critérios com soft delete seguro.
 router.put('/:id', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {
     try {
         const templateId = Number(req.params.id);
@@ -68,6 +70,7 @@ router.put('/:id', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest,
             where: { id: templateId },
             include: {
                 criterios: {
+                    where: { ativo: true }, // Só considera ativos para efeito de remoção
                     include: {
                         notas: { select: { id: true } }
                     }
@@ -79,18 +82,14 @@ router.put('/:id', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest,
             return res.status(404).json({ error: 'Template não encontrado.' });
         }
 
-        // Identificar critérios que o usuário tentou remover
-        const incomingIds = criterios.filter((c: any) => c.id != null).map((c: any) => Number(c.id));
-        const criteriosParaRemover = templateExistente.criterios.filter(c => !incomingIds.includes(c.id));
+        // Identificar critérios ativos que o admin removeu do formulário
+        const incomingIds = criterios
+            .filter((c: any) => c.id != null)
+            .map((c: any) => Number(c.id));
 
-        // Trava de Segurança: verificar se algum critério a ser removido possui notas
-        for (const crit of criteriosParaRemover) {
-            if (crit.notas.length > 0) {
-                return res.status(400).json({ 
-                    error: `O critério "${crit.descricao}" não pode ser removido pois já possui notas vinculadas a ele em avaliações concluídas.` 
-                });
-            }
-        }
+        const criteriosParaRemover = templateExistente.criterios.filter(
+            c => !incomingIds.includes(c.id)
+        );
 
         // Executar transação de atualização
         await prisma.$transaction(async (tx) => {
@@ -103,18 +102,33 @@ router.put('/:id', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest,
                 }
             });
 
-            // 2. Remover critérios permitidos
-            if (criteriosParaRemover.length > 0) {
-                const idsParaRemover = criteriosParaRemover.map(c => c.id);
-                await tx.criterio.deleteMany({
-                    where: { id: { in: idsParaRemover } }
-                });
+            // 2. Tratar critérios removidos:
+            //    - Com notas → inativar (soft delete) para preservar integridade histórica
+            //    - Sem notas → deletar fisicamente (limpeza)
+            for (const crit of criteriosParaRemover) {
+                if (crit.notas.length > 0) {
+                    // Soft delete: inativa o critério sem perder referências
+                    await tx.criterio.update({
+                        where: { id: crit.id },
+                        data: { ativo: false }
+                    });
+                } else {
+                    // Sem histórico: remoção física segura
+                    await tx.criterio.delete({
+                        where: { id: crit.id }
+                    });
+                }
             }
 
-            // 3. Atualizar ou Criar critérios
+            // 3. Atualizar ou criar critérios
             for (const item of criterios) {
                 const tipo = item.tipo || 'NUMERICO';
-                const pesoMaximo = tipo === 'NUMERICO' ? (item.pesoMaximo ? parseFloat(item.pesoMaximo) : 10) : null;
+                const pesoMaximo = tipo === 'NUMERICO'
+                    ? (item.pesoMaximo ? parseFloat(item.pesoMaximo) : 10)
+                    : null;
+                const faixasNota: string[] = Array.isArray(item.faixasNota)
+                    ? item.faixasNota.filter((f: string) => f.trim() !== '')
+                    : [];
 
                 if (item.id != null) {
                     // Atualiza critério existente
@@ -124,7 +138,8 @@ router.put('/:id', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest,
                             descricao: item.descricao,
                             descricaoLonga: item.descricaoLonga || null,
                             tipo,
-                            pesoMaximo
+                            pesoMaximo,
+                            faixasNota
                         }
                     });
                 } else {
@@ -135,6 +150,7 @@ router.put('/:id', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest,
                             descricaoLonga: item.descricaoLonga || null,
                             tipo,
                             pesoMaximo,
+                            faixasNota,
                             templateId
                         }
                     });
@@ -145,11 +161,24 @@ router.put('/:id', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest,
         const templateAtualizado = await prisma.templateAvaliacao.findUnique({
             where: { id: templateId },
             include: {
-                criterios: { orderBy: { id: 'asc' } }
+                criterios: {
+                    where: { ativo: true },
+                    orderBy: { id: 'asc' }
+                }
             }
         });
 
-        await logAudit('ATUALIZAR_TEMPLATE', { templateId, nome, alteracoesCriterios: criterios.length }, adminId);
+        await logAudit(
+            'ATUALIZAR_TEMPLATE',
+            {
+                templateId,
+                nome,
+                criteriosAtualizados: criterios.length,
+                criteriosInativados: criteriosParaRemover.filter(c => c.notas.length > 0).length,
+                criteriosDeletados: criteriosParaRemover.filter(c => c.notas.length === 0).length,
+            },
+            adminId
+        );
 
         return res.json(templateAtualizado);
     } catch (error) {

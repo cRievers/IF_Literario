@@ -9,7 +9,9 @@ interface Criterio {
   descricaoLonga: string | null;
   tipo: 'NUMERICO' | 'BOOLEANO' | 'TEXTO';
   pesoMaximo: number | null;
+  faixasNota: string[];
 }
+
 
 interface Template {
   id: number;

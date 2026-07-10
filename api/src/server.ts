@@ -32,6 +32,7 @@ import turmasRoutes from './routes/turmas.js';
 import alocacoesRoutes from './routes/alocacoes.js';
 import templatesRoutes from './routes/templates.js';
 import usuariosRoutes from './routes/usuarios.js';
+import edicoesRoutes from './routes/edicoes.js';
 
 // --- ROTAS ---
 app.use('/api/avaliacoes', avaliacoesRoutes);
@@ -41,6 +42,7 @@ app.use('/api/turmas', turmasRoutes);
 app.use('/api/alocacoes', alocacoesRoutes);
 app.use('/api/templates', templatesRoutes);
 app.use('/api/usuarios', usuariosRoutes);
+app.use('/api/edicoes', edicoesRoutes);
 
 
 app.get('/api/me', requireAuth, async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {

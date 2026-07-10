@@ -48,4 +48,35 @@ router.post('/', requireAuth, requireRole(['ORIENTADOR', 'ADMIN']), async (req: 
     }
 });
 
+// GET /api/ocorrencias - Retorna todas as ocorrências (apenas ADMIN)
+router.get('/', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {
+    try {
+        const ocorrencias = await prisma.ocorrencia.findMany({
+            include: {
+                orientador: { select: { id: true, nome: true, email: true } },
+                turma: { select: { id: true, nome: true, temaLivro: true } }
+            },
+            orderBy: { dataRegistro: 'desc' }
+        });
+
+        return res.json(ocorrencias);
+    } catch (error) {
+        next(error);
+    }
+});
+
+// PUT /api/ocorrencias/:id/resolver - Marca uma ocorrência como resolvida (apenas ADMIN)
+router.put('/:id/resolver', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {
+    try {
+        const { id } = req.params;
+        const ocorrencia = await prisma.ocorrencia.update({
+            where: { id },
+            data: { resolvida: true }
+        });
+        return res.json(ocorrencia);
+    } catch (error) {
+        next(error);
+    }
+});
+
 export default router;

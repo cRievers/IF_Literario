@@ -89,7 +89,7 @@ router.post('/', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest, r
 
 // DELETE /api/alocacoes/:id - Restrito a ADMIN
 // Remove uma alocação.
-router.delete('/:id', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {
+router.delete('/:id', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest<{ id: string }>, res: Response, next: NextFunction): Promise<any> => {
     try {
         const { id } = req.params;
         const adminId = req.user!.id;

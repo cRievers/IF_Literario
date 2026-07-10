@@ -3,7 +3,8 @@ import { supabase } from '../lib/supabase.js';
 import { prisma } from '../lib/prisma.js';
 
 // Estendendo o Request do Express para incluir o usuário
-export interface AuthRequest extends Request {
+// O generic P permite tipar req.params precisamente nos handlers (necessário no Express 5)
+export interface AuthRequest<P extends Record<string, string> = Record<string, string>> extends Request<P> {
     user?: any;
 }
 

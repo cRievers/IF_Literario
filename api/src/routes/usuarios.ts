@@ -109,7 +109,7 @@ router.post('/', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest, r
 });
 
 // PUT /api/usuarios/:id — atualiza nome, email e role
-router.put('/:id', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {
+router.put('/:id', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest<{ id: string }>, res: Response, next: NextFunction): Promise<any> => {
   try {
     const { id } = req.params;
     const { nome, email, role } = req.body as { nome?: string; email?: string; role?: Role };
@@ -141,7 +141,7 @@ router.put('/:id', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest,
 });
 
 // DELETE /api/usuarios/:id — soft delete: marca deletedAt, desativa no auth.users
-router.delete('/:id', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {
+router.delete('/:id', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest<{ id: string }>, res: Response, next: NextFunction): Promise<any> => {
   try {
     const { id } = req.params;
 

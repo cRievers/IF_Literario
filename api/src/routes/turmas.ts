@@ -66,7 +66,7 @@ router.post('/', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest, r
 
 // PUT /api/turmas/:id - Restrito a ADMIN
 // Atualiza os dados de uma turma existente.
-router.put('/:id', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {
+router.put('/:id', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest<{ id: string }>, res: Response, next: NextFunction): Promise<any> => {
     try {
         const { id } = req.params;
         const { nome, temaLivro, edicaoId, orientadorId, templateId } = req.body;

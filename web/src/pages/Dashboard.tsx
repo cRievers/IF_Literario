@@ -2,11 +2,15 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { TurmaCard } from '../components/TurmaCard';
 import { TrocarSenhaModal } from '../components/TrocarSenhaModal';
-import { AdminDashboard } from './AdminDashboard';
+import { AdminDashboard } from './admin/AdminDashboard';
 
 export const Dashboard: React.FC = () => {
   const { user, turmas, signOut } = useAuth();
   const [showTrocarSenha, setShowTrocarSenha] = useState(false);
+
+  if (user?.role === 'ADMIN') {
+    return <AdminDashboard />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -43,21 +47,15 @@ export const Dashboard: React.FC = () => {
           )}
         </div>
 
-        {user?.role === 'ADMIN' ? (
-          <AdminDashboard />
+        <h2 className="mb-4 text-xl font-semibold">Minhas Turmas ({turmas.length})</h2>
+        {turmas.length > 0 ? (
+          <div className="space-y-4">
+            {turmas.map((t) => (
+              <TurmaCard key={t.id} turma={t} />
+            ))}
+          </div>
         ) : (
-          <>
-            <h2 className="mb-4 text-xl font-semibold">Minhas Turmas ({turmas.length})</h2>
-            {turmas.length > 0 ? (
-              <div className="space-y-4">
-                {turmas.map((t) => (
-                  <TurmaCard key={t.id} turma={t} />
-                ))}
-              </div>
-            ) : (
-              <p className="text-gray-500">Nenhuma turma alocada.</p>
-            )}
-          </>
+          <p className="text-gray-500">Nenhuma turma alocada.</p>
         )}
       </div>
     </div>

@@ -6,8 +6,9 @@ import { TurmasTab } from './TurmasTab';
 import { AvaliadoresTab } from './AvaliadoresTab';
 import { OcorrenciasTab } from './OcorrenciasTab';
 import { TemplatesTab } from './TemplatesTab';
+import { UsuariosTab } from './UsuariosTab';
 
-type TabType = 'RESULTADOS' | 'TURMAS' | 'AVALIADORES' | 'OCORRENCIAS' | 'TEMPLATES';
+type TabType = 'RESULTADOS' | 'TURMAS' | 'AVALIADORES' | 'OCORRENCIAS' | 'TEMPLATES' | 'USUARIOS';
 
 export const AdminDashboard: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -20,6 +21,7 @@ export const AdminDashboard: React.FC = () => {
     { id: 'AVALIADORES', label: '👥 Avaliadores & Alocações' },
     { id: 'OCORRENCIAS', label: '⚠️ Ocorrências' },
     { id: 'TEMPLATES', label: '📋 Baremas (Templates)' },
+    { id: 'USUARIOS', label: '👤 Usuários' },
   ];
 
   return (
@@ -82,6 +84,7 @@ export const AdminDashboard: React.FC = () => {
           {activeTab === 'AVALIADORES' && <AvaliadoresTab />}
           {activeTab === 'OCORRENCIAS' && <OcorrenciasTab />}
           {activeTab === 'TEMPLATES' && <TemplatesTab />}
+          {activeTab === 'USUARIOS' && <UsuariosTab />}
         </div>
       </main>
     </div>

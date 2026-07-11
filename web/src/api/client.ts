@@ -29,5 +29,9 @@ export const apiClient = async (endpoint: string, options: RequestInit = {}) => 
     throw new Error(errorMessage);
   }
 
+  // 204 No Content e respostas sem body não devem ser parseadas como JSON
+  if (response.status === 204 || response.headers.get('content-length') === '0') {
+    return null;
+  }
   return response.json();
 };

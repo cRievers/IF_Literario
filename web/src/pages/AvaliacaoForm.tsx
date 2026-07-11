@@ -25,8 +25,11 @@ export const AvaliacaoForm: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // templateId vem do navigation state — nunca hardcoded
-  const templateId = (location.state as { templateId?: number } | null)?.templateId;
+  // templateId, avaliacaoId e readOnly vêm do navigation state
+  const state = location.state as { templateId?: number; avaliacaoId?: string; readOnly?: boolean } | null;
+  const templateId = state?.templateId;
+  const avaliacaoId = state?.avaliacaoId;
+  const readOnly = !!state?.readOnly;
 
   const [template, setTemplate] = useState<Template | null>(null);
   const [status, setStatus] = useState<any>(null);
@@ -42,18 +45,35 @@ export const AvaliacaoForm: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!templateId) {
-      setError('Esta turma não possui um template de avaliação configurado. Contate o administrador.');
-      setLoading(false);
-      return;
-    }
-
     const fetchTemplateAndStatus = async () => {
       try {
-        const [templateData, statusData] = await Promise.all([
-          apiClient(`/api/templates/${templateId}`),
-          apiClient(`/api/avaliacoes/turma/${turmaId}`)
-        ]);
+        let templateData;
+        let statusData;
+
+        if (avaliacaoId) {
+          // Carrega a avaliação específica (para Admin em modo de leitura)
+          const evaluationDetail = await apiClient(`/api/avaliacoes/${avaliacaoId}`);
+          const tId = evaluationDetail.templateId || templateId;
+          if (!tId) {
+            throw new Error('Template da avaliação não encontrado.');
+          }
+          templateData = await apiClient(`/api/templates/${tId}`);
+          statusData = {
+            jaAvaliou: true,
+            edicaoAtiva: evaluationDetail.edicaoAtiva,
+            avaliacao: evaluationDetail
+          };
+        } else {
+          if (!templateId) {
+            setError('Esta turma não possui um template de avaliação configurado. Contate o administrador.');
+            setLoading(false);
+            return;
+          }
+          [templateData, statusData] = await Promise.all([
+            apiClient(`/api/templates/${templateId}`),
+            apiClient(`/api/avaliacoes/turma/${turmaId}`)
+          ]);
+        }
 
         setTemplate(templateData);
         setStatus(statusData);
@@ -82,14 +102,14 @@ export const AvaliacaoForm: React.FC = () => {
 
         setNotas(initialNotas);
       } catch (err: any) {
-        setError(err.message || 'Erro ao carregar o template de avaliação.');
+        setError(err.message || 'Erro ao carregar os dados da avaliação.');
       } finally {
         setLoading(false);
       }
     };
 
     if (turmaId) fetchTemplateAndStatus();
-  }, [turmaId, templateId]);
+  }, [turmaId, templateId, avaliacaoId]);
 
   const handleNotaChange = (criterioId: number, valor: any) => {
     setNotas(prev => ({ ...prev, [criterioId]: valor }));
@@ -97,6 +117,7 @@ export const AvaliacaoForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (readOnly) return;
     setSubmitting(true);
     setError('');
 
@@ -162,7 +183,14 @@ export const AvaliacaoForm: React.FC = () => {
           <div className="mb-6 rounded-md bg-red-50 p-4 text-red-700">{error}</div>
         )}
 
-        {status?.jaAvaliou && !status?.edicaoAtiva && (
+        {readOnly && (
+          <div className="mb-6 rounded-md bg-indigo-50 p-4 text-indigo-700 border border-indigo-200 flex items-center gap-2">
+            <span>ℹ️</span>
+            <span>Você está visualizando esta avaliação no modo de leitura (Admin).</span>
+          </div>
+        )}
+
+        {status?.jaAvaliou && !status?.edicaoAtiva && !readOnly && (
           <div className="mb-6 rounded-md bg-yellow-50 p-4 text-yellow-700">
             Esta avaliação foi concluída e a edição do evento está inativa. Não é possível fazer alterações.
           </div>
@@ -216,6 +244,7 @@ export const AvaliacaoForm: React.FC = () => {
                     value={notas[criterio.id] === '' ? 0 : (parseFloat(notas[criterio.id]) || 0)}
                     onChange={(e) => handleNotaChange(criterio.id, parseFloat(e.target.value))}
                     className="w-full"
+                    disabled={readOnly}
                   />
                   <input
                     type="number"
@@ -246,6 +275,7 @@ export const AvaliacaoForm: React.FC = () => {
                       }
                     }}
                     className="w-20 text-center font-semibold bg-gray-50 rounded py-1 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    disabled={readOnly}
                   />
                 </div>
               )}
@@ -259,6 +289,7 @@ export const AvaliacaoForm: React.FC = () => {
                       checked={notas[criterio.id] === true}
                       onChange={() => handleNotaChange(criterio.id, true)}
                       className="mr-2"
+                      disabled={readOnly}
                     />
                     Sim
                   </label>
@@ -269,6 +300,7 @@ export const AvaliacaoForm: React.FC = () => {
                       checked={notas[criterio.id] === false}
                       onChange={() => handleNotaChange(criterio.id, false)}
                       className="mr-2"
+                      disabled={readOnly}
                     />
                     Não
                   </label>
@@ -282,6 +314,7 @@ export const AvaliacaoForm: React.FC = () => {
                   value={notas[criterio.id]}
                   onChange={(e) => handleNotaChange(criterio.id, e.target.value)}
                   placeholder="Escreva sua avaliação aqui..."
+                  disabled={readOnly}
                 />
               )}
             </div>
@@ -297,21 +330,32 @@ export const AvaliacaoForm: React.FC = () => {
               value={comentario}
               onChange={(e) => setComentario(e.target.value)}
               placeholder="Algum comentário adicional sobre a turma?"
+              disabled={readOnly}
             />
           </div>
 
           <div className="flex justify-end pt-4">
-            <button
-              type="submit"
-              disabled={submitting || (status?.jaAvaliou && !status?.edicaoAtiva)}
-              className="rounded bg-indigo-600 px-6 py-3 text-white font-semibold hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-            >
-              {submitting
-                ? 'Enviando...'
-                : status?.jaAvaliou
-                ? 'Atualizar Avaliação'
-                : 'Submeter Avaliação'}
-            </button>
+            {readOnly ? (
+              <button
+                type="button"
+                onClick={() => navigate('/')}
+                className="rounded bg-gray-600 px-6 py-3 text-white font-semibold hover:bg-gray-700 transition-colors"
+              >
+                Voltar ao Painel
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={submitting || (status?.jaAvaliou && !status?.edicaoAtiva)}
+                className="rounded bg-indigo-600 px-6 py-3 text-white font-semibold hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+              >
+                {submitting
+                  ? 'Enviando...'
+                  : status?.jaAvaliou
+                  ? 'Atualizar Avaliação'
+                  : 'Submeter Avaliação'}
+              </button>
+            )}
           </div>
         </form>
       </div>

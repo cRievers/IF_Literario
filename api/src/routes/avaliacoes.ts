@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { prisma } from '../lib/prisma.js';
 import { requireAuth, AuthRequest } from '../middlewares/auth.js';
+import { requireRole } from '../middlewares/roles.js';
 import { logAudit } from '../lib/logger.js';
 
 const router = Router();
@@ -193,6 +194,119 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response, next: Next
         await logAudit(action, { avaliacaoId: novaAvaliacao.id, turmaId, avaliadorId }, avaliadorId);
 
         return res.status(avaliacaoExistente ? 200 : 201).json(novaAvaliacao);
+    } catch (error) {
+        next(error);
+    }
+});
+
+// Listar todas as avaliações (Apenas ADMIN)
+router.get('/', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {
+    try {
+        const avaliacoes = await prisma.avaliacao.findMany({
+            include: {
+                turma: {
+                    include: {
+                        edicao: true
+                    }
+                },
+                avaliador: {
+                    select: {
+                        id: true,
+                        nome: true,
+                        email: true,
+                        role: true
+                    }
+                }
+            },
+            orderBy: {
+                turma: {
+                    nome: 'asc'
+                }
+            }
+        });
+
+        return res.json(avaliacoes);
+    } catch (error) {
+        next(error);
+    }
+});
+
+// Obter detalhes de uma avaliação por ID (ADMIN ou o próprio avaliador)
+router.get('/:id', requireAuth, async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {
+    try {
+        const { id } = req.params;
+        const userId = req.user!.id;
+        const role = req.user!.role;
+
+        const avaliacao = await prisma.avaliacao.findUnique({
+            where: { id },
+            include: {
+                turma: {
+                    include: {
+                        edicao: true
+                    }
+                },
+                avaliador: {
+                    select: {
+                        id: true,
+                        nome: true,
+                        email: true,
+                        role: true
+                    }
+                },
+                notas: true
+            }
+        });
+
+        if (!avaliacao) {
+            return res.status(404).json({ error: 'Avaliação não encontrada' });
+        }
+
+        if (role !== 'ADMIN' && avaliacao.avaliadorId !== userId) {
+            return res.status(403).json({ error: 'Acesso negado: você não tem permissão para visualizar esta avaliação' });
+        }
+
+        const avaliacaoData = {
+            id: avaliacao.id,
+            comentario: avaliacao.comentario,
+            turmaId: avaliacao.turmaId,
+            templateId: avaliacao.templateId,
+            jaAvaliou: true,
+            edicaoAtiva: avaliacao.turma.edicao.ativo,
+            avaliador: avaliacao.avaliador,
+            notas: avaliacao.notas.map((n: any) => ({
+                criterioId: n.criterioId,
+                valor: n.valorNumerico !== null ? n.valorNumerico : (n.valorBooleano !== null ? n.valorBooleano : n.valorTexto)
+            }))
+        };
+
+        return res.json(avaliacaoData);
+    } catch (error) {
+        next(error);
+    }
+});
+
+// Excluir avaliação (Apenas ADMIN)
+router.delete('/:id', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {
+    try {
+        const { id } = req.params;
+        const adminId = req.user!.id;
+
+        const avaliacao = await prisma.avaliacao.findUnique({
+            where: { id }
+        });
+
+        if (!avaliacao) {
+            return res.status(404).json({ error: 'Avaliação não encontrada' });
+        }
+
+        await prisma.avaliacao.delete({
+            where: { id }
+        });
+
+        await logAudit('EXCLUIR_AVALIACAO', { avaliacaoId: id, turmaId: avaliacao.turmaId, avaliadorId: avaliacao.avaliadorId }, adminId);
+
+        return res.json({ message: 'Avaliação excluída com sucesso.' });
     } catch (error) {
         next(error);
     }

@@ -7,13 +7,26 @@ import { AvaliadoresTab } from './AvaliadoresTab';
 import { OcorrenciasTab } from './OcorrenciasTab';
 import { TemplatesTab } from './TemplatesTab';
 import { UsuariosTab } from './UsuariosTab';
+import { AvaliacoesTab } from './AvaliacoesTab';
 
-type TabType = 'RESULTADOS' | 'TURMAS' | 'AVALIADORES' | 'OCORRENCIAS' | 'TEMPLATES' | 'USUARIOS';
+type TabType = 'RESULTADOS' | 'TURMAS' | 'AVALIADORES' | 'OCORRENCIAS' | 'TEMPLATES' | 'USUARIOS' | 'AVALIACOES';
 
 export const AdminDashboard: React.FC = () => {
   const { user, signOut } = useAuth();
-  const [activeTab, setActiveTab] = useState<TabType>('RESULTADOS');
+  
+  const [activeTab, setActiveTab] = useState<TabType>(() => {
+    const saved = localStorage.getItem('admin_dashboard_tab') as TabType;
+    return saved && ['RESULTADOS', 'TURMAS', 'AVALIADORES', 'OCORRENCIAS', 'TEMPLATES', 'USUARIOS', 'AVALIACOES'].includes(saved)
+      ? saved
+      : 'RESULTADOS';
+  });
+
   const [showTrocarSenha, setShowTrocarSenha] = useState(false);
+
+  const handleTabChange = (tabId: TabType) => {
+    setActiveTab(tabId);
+    localStorage.setItem('admin_dashboard_tab', tabId);
+  };
 
   const tabs = [
     { id: 'RESULTADOS', label: '🏆 Resultados & Ranking' },
@@ -22,6 +35,7 @@ export const AdminDashboard: React.FC = () => {
     { id: 'OCORRENCIAS', label: '⚠️ Ocorrências' },
     { id: 'TEMPLATES', label: '📋 Baremas (Templates)' },
     { id: 'USUARIOS', label: '👤 Usuários' },
+    { id: 'AVALIACOES', label: '📝 Avaliações' },
   ];
 
   return (
@@ -62,7 +76,7 @@ export const AdminDashboard: React.FC = () => {
             {tabs.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as TabType)}
+                onClick={() => handleTabChange(tab.id as TabType)}
                 className={`whitespace-nowrap pb-2 text-sm font-bold border-b-2 transition-colors duration-150 ${
                   activeTab === tab.id
                     ? 'border-indigo-600 text-indigo-600'
@@ -85,6 +99,7 @@ export const AdminDashboard: React.FC = () => {
           {activeTab === 'OCORRENCIAS' && <OcorrenciasTab />}
           {activeTab === 'TEMPLATES' && <TemplatesTab />}
           {activeTab === 'USUARIOS' && <UsuariosTab />}
+          {activeTab === 'AVALIACOES' && <AvaliacoesTab />}
         </div>
       </main>
     </div>

@@ -1,3 +1,4 @@
+// api/src/routes/ocorrencias.ts
 import { Router, Response, NextFunction } from 'express';
 import { prisma } from '../lib/prisma.js';
 import { requireAuth, AuthRequest } from '../middlewares/auth.js';
@@ -6,7 +7,7 @@ import { requireRole } from '../middlewares/roles.js';
 const router = Router();
 
 // GET /api/ocorrencias/minhas - Retorna as ocorrências do orientador logado
-router.get('/minhas', requireAuth, requireRole(['ORIENTADOR']), async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {
+router.get('/minhas', requireAuth, requireRole(['ORIENTADOR', 'AVALIADOR']), async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {
     try {
         const userId = req.user!.id;
         
@@ -25,7 +26,7 @@ router.get('/minhas', requireAuth, requireRole(['ORIENTADOR']), async (req: Auth
 });
 
 // POST /api/ocorrencias - Cria uma nova ocorrência
-router.post('/', requireAuth, requireRole(['ORIENTADOR', 'ADMIN']), async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {
+router.post('/', requireAuth, requireRole(['ORIENTADOR', 'AVALIADOR', 'ADMIN']), async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {
     try {
         const { descricao, turmaId } = req.body;
         const orientadorId = req.user!.id;

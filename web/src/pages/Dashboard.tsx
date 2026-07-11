@@ -1,3 +1,4 @@
+// web/src/pages/Dashboard.tsx
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { TurmaCard } from '../components/TurmaCard';
@@ -38,7 +39,7 @@ export const Dashboard: React.FC = () => {
           <p><strong>Usuário:</strong> {user?.nome}</p>
           <p><strong>Email:</strong> {user?.email}</p>
           <p><strong>Perfil:</strong> {user?.role}</p>
-          {user?.role === 'ORIENTADOR' && (
+          {(user?.role === 'ORIENTADOR' || user?.role === 'AVALIADOR') && (
             <div className="mt-4">
               <a href="/ocorrencias" className="inline-block rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700">
                 Minhas Ocorrências

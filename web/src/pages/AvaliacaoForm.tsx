@@ -35,6 +35,11 @@ export const AvaliacaoForm: React.FC = () => {
   const [error, setError] = useState('');
   const [notas, setNotas] = useState<Record<number, any>>({});
   const [comentario, setComentario] = useState('');
+  const [faixasVisiveis, setFaixasVisiveis] = useState<Record<number, boolean>>({});
+
+  const toggleFaixas = (criterioId: number) => {
+    setFaixasVisiveis(prev => ({ ...prev, [criterioId]: !prev[criterioId] }));
+  };
 
   useEffect(() => {
     if (!templateId) {
@@ -166,17 +171,39 @@ export const AvaliacaoForm: React.FC = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           {template?.criterios.map((criterio) => (
             <div key={criterio.id} className="rounded border p-4">
-              <label className="block font-medium text-gray-800 mb-2">
-                {criterio.descricao}
-                {criterio.tipo === 'NUMERICO' && (
-                  <span className="text-sm text-gray-500 ml-2">(Máx: {criterio.pesoMaximo})</span>
+              <div className="flex items-start justify-between mb-2">
+                <label className="block font-medium text-gray-800">
+                  {criterio.descricao}
+                  {criterio.tipo === 'NUMERICO' && (
+                    <span className="text-sm text-gray-500 ml-2">(Máx: {criterio.pesoMaximo})</span>
+                  )}
+                </label>
+                {criterio.faixasNota && criterio.faixasNota.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => toggleFaixas(criterio.id)}
+                    className="ml-2 inline-flex items-center text-xs font-semibold text-indigo-600 hover:text-indigo-800 focus:outline-none transition-colors border border-indigo-200 hover:border-indigo-400 bg-indigo-50/30 hover:bg-indigo-50/80 px-2 py-1 rounded"
+                  >
+                    {faixasVisiveis[criterio.id] ? 'Ocultar faixas ↑' : 'Ver faixas ↓'}
+                  </button>
                 )}
-              </label>
+              </div>
 
               {criterio.descricaoLonga && (
                 <p className="text-sm text-gray-500 mb-4 bg-gray-50 p-2 rounded border border-gray-100 italic">
                   {criterio.descricaoLonga}
                 </p>
+              )}
+
+              {criterio.faixasNota && criterio.faixasNota.length > 0 && faixasVisiveis[criterio.id] && (
+                <div className="mb-4 rounded-md bg-indigo-50/50 p-3 text-sm text-indigo-900 border border-indigo-100 transition-all duration-300">
+                  <h4 className="font-semibold mb-1 text-indigo-950 text-xs">Faixas de Nota:</h4>
+                  <ul className="list-disc list-inside space-y-1">
+                    {criterio.faixasNota.map((faixa, idx) => (
+                      <li key={idx} className="text-xs text-indigo-800">{faixa}</li>
+                    ))}
+                  </ul>
+                </div>
               )}
 
               {criterio.tipo === 'NUMERICO' && (

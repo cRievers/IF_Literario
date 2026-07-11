@@ -95,7 +95,7 @@ export const ResultadosTab: React.FC = () => {
                 <p className="text-sm opacity-90">{campea.percentual}% de aproveitamento</p>
                 <div className="mt-2">
                   <span className={`inline-block rounded px-2 py-1 text-xs font-bold ${campea.status === 'CONCLUIDO' ? 'bg-green-600 text-white' : 'bg-amber-100 text-amber-900'}`}>
-                    {campea.status === 'CONCLUIDO' ? 'Concluído (3+ avaliações)' : `Pendente (${campea.totalAvaliacoes}/3 avaliações)`}
+                    {campea.status === 'CONCLUIDO' ? 'Concluído (3+ avaliações)' : `⚠️ Aviso: ${campea.totalAvaliacoes}/3 avaliações mínimas`}
                   </span>
                 </div>
               </div>
@@ -131,7 +131,7 @@ export const ResultadosTab: React.FC = () => {
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-right text-gray-500">{t.percentual}%</td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-center">
                       <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${t.status === 'CONCLUIDO' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}`}>
-                        {t.status}
+                        {t.status === 'CONCLUIDO' ? 'Concluído' : `⚠️ ${t.totalAvaliacoes}/3`}
                       </span>
                     </td>
                   </tr>
@@ -187,7 +187,7 @@ export const ResultadosTab: React.FC = () => {
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-sm text-center">
                     <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${t.status === 'CONCLUIDO' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}`}>
-                      {t.status === 'CONCLUIDO' ? 'Concluído' : 'Pendente'}
+                      {t.status === 'CONCLUIDO' ? 'Concluído' : `⚠️ ${t.avaliacoesVisitantesCount}/3 avaliações`}
                     </span>
                   </td>
                 </tr>

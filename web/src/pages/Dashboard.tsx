@@ -47,7 +47,7 @@ export const Dashboard: React.FC = () => {
           )}
         </div>
 
-        <h2 className="mb-4 text-xl font-semibold">Minhas Turmas ({turmas.length})</h2>
+        <h2 className="mb-4 text-xl font-semibold">Turmas Disponíveis ({turmas.length})</h2>
         {turmas.length > 0 ? (
           <div className="space-y-4">
             {turmas.map((t) => (

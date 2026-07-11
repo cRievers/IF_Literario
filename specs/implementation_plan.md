@@ -107,6 +107,23 @@ Nesta sprint focamos nas ações específicas do **Orientador**, permitindo que 
 
 ---
 
+### ✅ Sprint 5: Avaliação Livre + Aviso de Mínimo (CONCLUÍDA)
+
+Mudança de regras de negócio: avaliador passa a ter acesso livre a qualquer turma, e o mínimo de 3 avaliações por turma vira aviso (não bloqueio). A fórmula de cálculo permanece inalterada (opção A — booleanos e numéricos calculados juntos por normalização).
+
+**Backend (`api/`)**
+- [x] Remover validação que limitava o avaliador a 3 avaliações (`Regra 3x3`).
+- [x] Remover bloqueio de turma com 3 avaliações de visitantes.
+- [x] `GET /api/avaliacoes/turma/:id`: substituir `maxAvaliacoes` por `avisoMinimo: boolean` (true se < 3 avaliações).
+- [x] `GET /api/me`: para `AVALIADOR`, retornar **todas** as turmas da edição ativa (não só as alocadas).
+
+**Frontend (`web/`)**
+- [x] `TurmaCard`: remover lógica de `limiteAtingido`; adicionar badge amarelo informativo `⚠️ Mínimo de 3 avaliações não atingido`.
+- [x] `Dashboard.tsx`: atualizar título de "Minhas Turmas" para "Turmas Disponíveis".
+- [x] `ResultadosTab.tsx`: badges de status exibem contagem atual (ex: `⚠️ 1/3 avaliações`) em vez de texto genérico.
+
+---
+
 ## Verification Plan
 
 ### Automated Tests
@@ -114,6 +131,7 @@ Não há testes unitários ou E2E definidos até o momento. A verificação prim
 
 ### Manual Verification
 1. **Login e Rotas:** Tentar acessar rotas de Admin com login de Avaliador (deve ser bloqueado). Verificar permanência de sessão no Frontend ao recarregar a página.
-2. **Avaliação:** Submeter avaliação com notas acima do peso permitido. Tentar submeter avaliações repetidas. Tentar avaliar uma turma para a qual não está alocado. Validar que as transações são revertidas em caso de falha.
-3. **Cálculos:** Verificar manualmente se a soma da nota final considera corretamente o critério booleano valendo 10 e se a escala final respeita a faixa de 0 a 100%.
-4. **CRUD:** Criar uma nova alocação pelo painel admin e verificar se a turma aparece imediatamente no painel do avaliador alvo.
+2. **Avaliação Livre:** Avaliador deve ver todas as turmas da edição ativa e conseguir avaliar mais de 3 sem bloqueio.
+3. **Aviso de Mínimo:** Turma com menos de 3 avaliações deve exibir badge amarelo no card e no painel admin — sem impedir o fluxo.
+4. **Cálculos:** Verificar que booleanos (0 ou pesoMaximo) e numéricos são normalizados juntos em `achieved/max`, resultando em percentual correto.
+5. **CRUD:** Alocações permanecem funcionais para fins administrativos, mas não restringem o acesso do avaliador.

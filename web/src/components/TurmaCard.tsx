@@ -12,7 +12,7 @@ interface TurmaCardProps {
 interface TurmaStatus {
   turmaId: string;
   totalAvaliacoes: number;
-  maxAvaliacoes: number;
+  avisoMinimo: boolean;
   jaAvaliou: boolean;
   edicaoAtiva?: boolean;
 }
@@ -46,8 +46,7 @@ export const TurmaCard: React.FC<TurmaCardProps> = ({ turma }) => {
 
   const isOrientador = user?.role === 'ORIENTADOR';
   const semTemplate = !turma.templateId;
-  const limiteAtingido = !isOrientador && status && status.totalAvaliacoes >= status.maxAvaliacoes;
-  const avaliavel = !loading && !status?.jaAvaliou && status && !limiteAtingido && !semTemplate;
+  const avaliavel = !loading && !status?.jaAvaliou && status !== null && !semTemplate;
   const podeEditar = !loading && status?.jaAvaliou && status.edicaoAtiva && !semTemplate;
   const habilitado = avaliavel || podeEditar;
 
@@ -61,7 +60,7 @@ export const TurmaCard: React.FC<TurmaCardProps> = ({ turma }) => {
         )}
 
         {!loading && status && (
-          <div className="mt-2 text-sm">
+          <div className="mt-2 flex flex-col gap-1 text-sm">
             {semTemplate ? (
               <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-red-800">
                 Sem template de avaliação
@@ -70,13 +69,15 @@ export const TurmaCard: React.FC<TurmaCardProps> = ({ turma }) => {
               <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-green-800">
                 Avaliação Concluída
               </span>
-            ) : limiteAtingido ? (
-              <span className="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-yellow-800">
-                Limite de Avaliações Atingido
-              </span>
             ) : (
               <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-blue-800">
-                {isOrientador ? 'Pendente' : `Pendente (${status.totalAvaliacoes}/${status.maxAvaliacoes} avaliações)`}
+                {isOrientador ? 'Pendente' : `Pendente (${status.totalAvaliacoes} avaliações)`}
+              </span>
+            )}
+            {/* Aviso informativo — não bloqueia */}
+            {!isOrientador && status.avisoMinimo && !status.jaAvaliou && (
+              <span className="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-yellow-800">
+                ⚠️ Mínimo de 3 avaliações não atingido
               </span>
             )}
           </div>

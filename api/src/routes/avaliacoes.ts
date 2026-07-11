@@ -32,7 +32,7 @@ router.get('/turma/:id', requireAuth, async (req: AuthRequest, res: Response, ne
 
         const avaliacoesVisitantes = turma.avaliacoes.filter((a: any) => a.avaliador.role === 'AVALIADOR');
         const totalAvaliacoes = avaliacoesVisitantes.length;
-        const avisoMinimo = totalAvaliacoes < 3; // Aviso informativo — sem bloqueio
+        const maxAvaliacoes = 3;
 
         const minhaAvaliacao = turma.avaliacoes.find((a: any) => a.avaliadorId === userId);
         const jaAvaliou = !!minhaAvaliacao;
@@ -52,7 +52,7 @@ router.get('/turma/:id', requireAuth, async (req: AuthRequest, res: Response, ne
         return res.json({
             turmaId: id,
             totalAvaliacoes,
-            avisoMinimo,
+            maxAvaliacoes,
             jaAvaliou,
             edicaoAtiva: turma.edicao.ativo,
             avaliacao: avaliacaoData
@@ -99,8 +99,30 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response, next: Next
             }
         }
 
-        // 3. Regra de avaliação livre — sem limite por avaliador nem por turma
-        // O mínimo de 3 avaliações por turma é apenas informativo (avisoMinimo no GET /turma/:id)
+        // 3. Validar limite de avaliações do avaliador (Regra 3x3) e limite por turma (somente para novas avaliações)
+        if (!avaliacaoExistente && role === 'AVALIADOR') {
+            const avaliacoesFeitas = await prisma.avaliacao.count({
+                where: { avaliadorId }
+            });
+
+            if (avaliacoesFeitas >= 3) {
+                return res.status(400).json({ error: 'Você já atingiu o limite de 3 avaliações.' });
+            }
+
+            // 3. Validar limite de avaliações da turma (Máximo 3 visitantes)
+            const avaliacoesDaTurma = await prisma.avaliacao.count({
+                where: {
+                    turmaId,
+                    avaliador: {
+                        role: 'AVALIADOR'
+                    }
+                }
+            });
+
+            if (avaliacoesDaTurma >= 3) {
+                return res.status(400).json({ error: 'Esta turma já recebeu o máximo de 3 avaliações de visitantes.' });
+            }
+        }
 
         // 4. Validar os critérios do template
         const template = await prisma.templateAvaliacao.findUnique({

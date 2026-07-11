@@ -130,7 +130,7 @@ export const ResultadosTab: React.FC = () => {
                         <span className={`mt-1 inline-block rounded px-2 py-0.5 text-xs font-bold ${
                           campeaDoLivro.status === 'CONCLUIDO' ? 'bg-green-600 text-white' : 'bg-amber-100 text-amber-900'
                         }`}>
-                          {campeaDoLivro.status === 'CONCLUIDO' ? 'Concluído' : `⚠️ ${campeaDoLivro.totalAvaliacoes}/3`}
+                          {campeaDoLivro.status === 'CONCLUIDO' ? 'Concluído (3+ avaliações)' : `Pendente (${campeaDoLivro.totalAvaliacoes}/3 avaliações)`}
                         </span>
                       </div>
                     </div>
@@ -162,7 +162,7 @@ export const ResultadosTab: React.FC = () => {
                                 <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${
                                   t.status === 'CONCLUIDO' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'
                                 }`}>
-                                  {t.status === 'CONCLUIDO' ? 'Concluído' : `⚠️ ${t.totalAvaliacoes}/3`}
+                                  {t.status}
                                 </span>
                               </td>
                             </tr>
@@ -232,7 +232,7 @@ export const ResultadosTab: React.FC = () => {
                             <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
                               t.status === 'CONCLUIDO' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'
                             }`}>
-                              {t.status === 'CONCLUIDO' ? 'Concluído' : `⚠️ ${t.avaliacoesVisitantesCount}/3`}
+                              {t.status === 'CONCLUIDO' ? 'Concluído' : 'Pendente'}
                             </span>
                           </td>
                         </tr>

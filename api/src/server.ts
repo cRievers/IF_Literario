@@ -66,11 +66,14 @@ app.get('/api/me', requireAuth, async (req: AuthRequest, res: Response, next: Ne
         let turmas: any[] = [];
 
         if (role === 'AVALIADOR') {
-            // Avaliador pode avaliar qualquer turma da edição ativa — sem restrição por alocação
-            turmas = await prisma.turma.findMany({
-                where: { edicao: { ativo: true } },
-                select: turmaSelect
+            const alocacoes = await prisma.alocacao.findMany({
+                where: {
+                    avaliadorId: userId,
+                    turma: { edicao: { ativo: true } } // Apenas edição ativa
+                },
+                include: { turma: { select: turmaSelect } }
             });
+            turmas = alocacoes.map((a: any) => a.turma);
         } else if (role === 'ORIENTADOR') {
             turmas = await prisma.turma.findMany({
                 where: { orientadorId: userId, edicao: { ativo: true } },

@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { TurmaCard } from '../components/TurmaCard';
 import { TrocarSenhaModal } from '../components/TrocarSenhaModal';
 import { AdminDashboard } from './admin/AdminDashboard';
+import logoAzul from '../assets/logo_if_literario_sf_azul-Photoroom.png';
 
 export const Dashboard: React.FC = () => {
   const { user, turmas, signOut } = useAuth();
@@ -17,7 +18,10 @@ export const Dashboard: React.FC = () => {
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="mx-auto max-w-4xl rounded-lg bg-white p-6 shadow">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Painel IF Literário</h1>
+          <div className="flex items-center gap-3">
+            <img src={logoAzul} alt="Logo IF Literário" className="h-10 w-auto object-contain" />
+            <h1 className="text-2xl font-bold text-slate-800">Painel IF Literário</h1>
+          </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowTrocarSenha(true)}

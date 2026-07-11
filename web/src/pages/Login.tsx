@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Mail, Lock, BookOpen, AlertCircle, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
+import { Mail, Lock, AlertCircle, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
+import logoAzul from '../assets/logo_if_literario_sf_azul-Photoroom.png';
 
 export const Login: React.FC = () => {
   const { user, authError } = useAuth();
@@ -77,8 +78,8 @@ export const Login: React.FC = () => {
       <div className="relative max-w-md w-full bg-white/95 backdrop-blur-md rounded-2xl border border-slate-100 shadow-2xl shadow-slate-200/60 p-8 transition-all duration-300">
         
         <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 bg-ifmg-green/10 text-ifmg-green rounded-2xl flex items-center justify-center shadow-inner mb-4 transition-transform hover:scale-105 duration-300">
-            <BookOpen className="w-8 h-8" />
+          <div className="mb-4 transition-transform hover:scale-105 duration-300">
+            <img src={logoAzul} alt="Logo IF Literário" className="h-24 w-auto object-contain" />
           </div>
           <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">
             IF Literário

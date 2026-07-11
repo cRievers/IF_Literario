@@ -8,6 +8,7 @@ import { OcorrenciasTab } from './OcorrenciasTab';
 import { TemplatesTab } from './TemplatesTab';
 import { UsuariosTab } from './UsuariosTab';
 import { AvaliacoesTab } from './AvaliacoesTab';
+import logoPalha from '../../assets/logo_if_literario_sf_palha-Photoroom.png';
 
 type TabType = 'RESULTADOS' | 'TURMAS' | 'AVALIADORES' | 'OCORRENCIAS' | 'TEMPLATES' | 'USUARIOS' | 'AVALIACOES';
 
@@ -44,7 +45,8 @@ export const AdminDashboard: React.FC = () => {
       <header className="bg-indigo-700 text-white shadow-md">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-2xl font-black tracking-wider">IF LITERÁRIO</span>
+            <img src={logoPalha} alt="Logo IF Literário" className="h-10 w-auto object-contain" />
+            <span className="text-2xl font-black tracking-wider hidden sm:inline-block">IF LITERÁRIO</span>
             <span className="rounded bg-indigo-500 px-2.5 py-0.5 text-xs font-bold uppercase tracking-widest text-indigo-100 shadow-inner">
               Portal Admin
             </span>

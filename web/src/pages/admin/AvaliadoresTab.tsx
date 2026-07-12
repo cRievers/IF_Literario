@@ -186,12 +186,6 @@ export const AvaliadoresTab: React.FC = () => {
                     <p className="text-sm text-gray-400 italic mb-4">Nenhuma turma vinculada</p>
                   )}
                 </div>
-                <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
-                  <span className="text-xs text-gray-500 font-medium">Meta: 3 turmas</span>
-                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${count === 3 ? 'bg-green-100 text-green-800' : count > 3 ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'}`}>
-                    {count === 3 ? 'Completo (3/3)' : count > 3 ? `Excesso (${count}/3)` : `Parcial (${count}/3)`}
-                  </span>
-                </div>
               </div>
             );
           })}

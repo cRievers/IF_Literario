@@ -1,3 +1,4 @@
+// api/src/routes/avaliacoes.ts
 import { Router, Request, Response, NextFunction } from 'express';
 import { prisma } from '../lib/prisma.js';
 import { requireAuth, AuthRequest } from '../middlewares/auth.js';
@@ -32,7 +33,6 @@ router.get('/turma/:id', requireAuth, async (req: AuthRequest, res: Response, ne
 
         const avaliacoesVisitantes = turma.avaliacoes.filter((a: any) => a.avaliador.role === 'AVALIADOR');
         const totalAvaliacoes = avaliacoesVisitantes.length;
-        const maxAvaliacoes = 3;
 
         const minhaAvaliacao = turma.avaliacoes.find((a: any) => a.avaliadorId === userId);
         const jaAvaliou = !!minhaAvaliacao;
@@ -52,7 +52,6 @@ router.get('/turma/:id', requireAuth, async (req: AuthRequest, res: Response, ne
         return res.json({
             turmaId: id,
             totalAvaliacoes,
-            maxAvaliacoes,
             jaAvaliou,
             edicaoAtiva: turma.edicao.ativo,
             avaliacao: avaliacaoData

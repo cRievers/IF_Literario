@@ -99,32 +99,7 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response, next: Next
             }
         }
 
-        // 3. Validar limite de avaliações do avaliador (Regra 3x3) e limite por turma (somente para novas avaliações)
-        if (!avaliacaoExistente && role === 'AVALIADOR') {
-            const avaliacoesFeitas = await prisma.avaliacao.count({
-                where: { avaliadorId }
-            });
-
-            if (avaliacoesFeitas >= 3) {
-                return res.status(400).json({ error: 'Você já atingiu o limite de 3 avaliações.' });
-            }
-
-            // 3. Validar limite de avaliações da turma (Máximo 3 visitantes)
-            const avaliacoesDaTurma = await prisma.avaliacao.count({
-                where: {
-                    turmaId,
-                    avaliador: {
-                        role: 'AVALIADOR'
-                    }
-                }
-            });
-
-            if (avaliacoesDaTurma >= 3) {
-                return res.status(400).json({ error: 'Esta turma já recebeu o máximo de 3 avaliações de visitantes.' });
-            }
-        }
-
-        // 4. Validar os critérios do template
+        // 3. Validar os critérios do template
         const template = await prisma.templateAvaliacao.findUnique({
             where: { id: Number(templateId) },
             include: { criterios: true }

@@ -56,7 +56,7 @@ router.get('/campea', requireAuth, requireRole(['ADMIN']), async (req: AuthReque
 
             // Média simples das avaliações dos visitantes
             const mediaAchieved = totalAvaliacoes > 0 ? somaGeralAchieved / totalAvaliacoes : 0;
-            const mediaMax = totalAvaliacoes > 0 ? somaGeralMax / totalAvaliacoes : (turma.template?.criterios.reduce((acc, c) => acc + (c.tipo === 'NUMERICO' ? (c.pesoMaximo || 10) : 10), 0) || 0);
+            const mediaMax = totalAvaliacoes > 0 ? somaGeralMax / totalAvaliacoes : ((turma.template as any)?.criterios?.reduce((acc: number, c: any) => acc + (c.tipo === 'NUMERICO' ? (c.pesoMaximo || 10) : 10), 0) || 0);
             const percentual = mediaMax > 0 ? (mediaAchieved / mediaMax) * 100 : 0;
 
             return {

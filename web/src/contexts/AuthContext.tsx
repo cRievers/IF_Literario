@@ -8,6 +8,7 @@ export type Turma = {
   nome: string;
   temaLivro: string;
   templateId: number | null;
+  templateOrientadorId: number | null;
   edicao?: { ano: number; ativo: boolean };
 };
 

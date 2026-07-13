@@ -17,7 +17,7 @@ router.get('/', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest, re
                     orderBy: { id: 'asc' }
                 },
                 _count: {
-                    select: { turmas: true, avaliacoes: true }
+                    select: { turmasAvaliador: true, turmasOrientador: true, avaliacoes: true }
                 }
             },
             orderBy: { id: 'asc' }

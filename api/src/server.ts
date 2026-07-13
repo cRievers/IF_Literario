@@ -56,12 +56,13 @@ app.get('/api/me', requireAuth, async (req: AuthRequest, res: Response, next: Ne
         const userId = req.user.id;
         const role = req.user.role;
 
-        // Campos selecionados de turma — inclui templateId para o frontend saber qual barema buscar
+        // Campos selecionados de turma — inclui ambos os templateIds para o frontend escolher o barema correto por role
         const turmaSelect = {
             id: true,
             nome: true,
             temaLivro: true,
             templateId: true,
+            templateOrientadorId: true,
             edicao: { select: { ano: true, ativo: true } }
         };
 

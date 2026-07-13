@@ -15,6 +15,7 @@ router.get('/', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest, re
                 edicao: true,
                 orientador: { select: { id: true, nome: true, email: true } },
                 template: { select: { id: true, nome: true } },
+                templateOrientador: { select: { id: true, nome: true } },
                 alocacoes: {
                     include: {
                         avaliador: { select: { id: true, nome: true, email: true } }
@@ -34,7 +35,7 @@ router.get('/', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest, re
 // Cria uma nova turma no sistema.
 router.post('/', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {
     try {
-        const { nome, temaLivro, edicaoId, orientadorId, templateId } = req.body;
+        const { nome, temaLivro, edicaoId, orientadorId, templateId, templateOrientadorId } = req.body;
         const adminId = req.user!.id;
 
         if (!nome || !temaLivro || !edicaoId) {
@@ -47,12 +48,14 @@ router.post('/', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest, r
                 temaLivro,
                 edicaoId: Number(edicaoId),
                 orientadorId: orientadorId || null,
-                templateId: templateId ? Number(templateId) : null
+                templateId: templateId ? Number(templateId) : null,
+                templateOrientadorId: templateOrientadorId ? Number(templateOrientadorId) : null
             },
             include: {
                 edicao: true,
                 orientador: { select: { id: true, nome: true, email: true } },
-                template: { select: { id: true, nome: true } }
+                template: { select: { id: true, nome: true } },
+                templateOrientador: { select: { id: true, nome: true } }
             }
         });
 
@@ -69,7 +72,7 @@ router.post('/', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest, r
 router.put('/:id', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest<{ id: string }>, res: Response, next: NextFunction): Promise<any> => {
     try {
         const { id } = req.params;
-        const { nome, temaLivro, edicaoId, orientadorId, templateId } = req.body;
+        const { nome, temaLivro, edicaoId, orientadorId, templateId, templateOrientadorId } = req.body;
         const adminId = req.user!.id;
 
         const turmaExistente = await prisma.turma.findUnique({ where: { id } });
@@ -84,12 +87,14 @@ router.put('/:id', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest<
                 temaLivro: temaLivro || turmaExistente.temaLivro,
                 edicaoId: edicaoId ? Number(edicaoId) : turmaExistente.edicaoId,
                 orientadorId: orientadorId !== undefined ? (orientadorId || null) : turmaExistente.orientadorId,
-                templateId: templateId !== undefined ? (templateId ? Number(templateId) : null) : turmaExistente.templateId
+                templateId: templateId !== undefined ? (templateId ? Number(templateId) : null) : turmaExistente.templateId,
+                templateOrientadorId: templateOrientadorId !== undefined ? (templateOrientadorId ? Number(templateOrientadorId) : null) : turmaExistente.templateOrientadorId
             },
             include: {
                 edicao: true,
                 orientador: { select: { id: true, nome: true, email: true } },
-                template: { select: { id: true, nome: true } }
+                template: { select: { id: true, nome: true } },
+                templateOrientador: { select: { id: true, nome: true } }
             }
         });
 

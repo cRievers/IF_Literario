@@ -37,14 +37,21 @@ export const TurmaCard: React.FC<TurmaCardProps> = ({ turma }) => {
     fetchStatus();
   }, [turma.id]);
 
+  const isOrientador = user?.role === 'ORIENTADOR';
+
   const handleAvaliar = () => {
+    // ORIENTADOR usa seu template específico; AVALIADOR usa o template de visitantes
+    const templateIdParaUsar = isOrientador
+      ? turma.templateOrientadorId
+      : turma.templateId;
+
     navigate(`/avaliar/${turma.id}`, {
-      state: { templateId: turma.templateId }
+      state: { templateId: templateIdParaUsar }
     });
   };
 
-  const isOrientador = user?.role === 'ORIENTADOR';
-  const semTemplate = !turma.templateId;
+  // Verifica se o template do role correto está configurado
+  const semTemplate = isOrientador ? !turma.templateOrientadorId : !turma.templateId;
   const avaliavel = !loading && !status?.jaAvaliou && status && !semTemplate;
   const podeEditar = !loading && status?.jaAvaliou && status.edicaoAtiva && !semTemplate;
   const habilitado = avaliavel || podeEditar;

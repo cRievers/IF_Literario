@@ -48,31 +48,34 @@ model Edicao {
 }
 
 model Turma {
-  id           String               @id @default(uuid())
-  nome         String
-  temaLivro    String
-  edicaoId     Int
-  orientadorId String?
-  templateId   Int?                 // Template de barema usado pelos avaliadores desta turma
+  id                   String               @id @default(uuid())
+  nome                 String
+  temaLivro            String
+  edicaoId             Int
+  orientadorId         String?
+  templateId           Int?                 // Template de barema para AVALIADORES
+  templateOrientadorId Int?                 // Template de barema para ORIENTADORES
 
-  edicao       Edicao               @relation(fields: [edicaoId], references: [id])
-  orientador   User?                @relation(fields: [orientadorId], references: [id])
-  template     TemplateAvaliacao?   @relation(fields: [templateId], references: [id])
-  avaliacoes   Avaliacao[]
-  ocorrencias  Ocorrencia[]
-  alocacoes    Alocacao[]           @relation("TurmaAlocacoes")
+  edicao               Edicao               @relation(fields: [edicaoId], references: [id])
+  orientador           User?                @relation(fields: [orientadorId], references: [id])
+  template             TemplateAvaliacao?   @relation("TemplateAvaliador", fields: [templateId], references: [id])
+  templateOrientador   TemplateAvaliacao?   @relation("TemplateOrientador", fields: [templateOrientadorId], references: [id])
+  avaliacoes           Avaliacao[]
+  ocorrencias          Ocorrencia[]
+  alocacoes            Alocacao[]           @relation("TurmaAlocacoes")
 
   @@map("turmas")
 }
 
 // --- TEMPLATES DINÂMICOS (BAREMAS) ---
 model TemplateAvaliacao {
-  id          Int        @id @default(autoincrement())
-  nome        String     // Ex: "Ficha Orientador", "Barema IF Literário", "Primeiro Ano"
-  descricao   String?
-  criterios   Criterio[]
-  avaliacoes  Avaliacao[]
-  turmas      Turma[]    // Turmas que usam este template
+  id                   Int        @id @default(autoincrement())
+  nome                 String     // Ex: "Ficha Orientador", "Barema IF Literário", "Primeiro Ano"
+  descricao            String?
+  criterios            Criterio[]
+  avaliacoes           Avaliacao[]
+  turmasAvaliador      Turma[]    @relation("TemplateAvaliador")  // Turmas que usam este template para AVALIADORES
+  turmasOrientador     Turma[]    @relation("TemplateOrientador") // Turmas que usam este template para ORIENTADORES
 
   @@map("templates_avaliacao")
 }

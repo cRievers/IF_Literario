@@ -15,9 +15,11 @@ interface Turma {
   edicaoId: number;
   orientadorId?: string | null;
   templateId?: number | null;
+  templateOrientadorId?: number | null;
   edicao: Edicao;
   orientador?: { id: string; nome: string; email: string } | null;
   template?: { id: number; nome: string } | null;
+  templateOrientador?: { id: number; nome: string } | null;
 }
 
 interface Usuario {
@@ -51,6 +53,7 @@ export const TurmasTab: React.FC = () => {
   const [formTurmaEdicaoId, setFormTurmaEdicaoId] = useState('');
   const [formTurmaOrientadorId, setFormTurmaOrientadorId] = useState('');
   const [formTurmaTemplateId, setFormTurmaTemplateId] = useState('');
+  const [formTurmaTemplateOrientadorId, setFormTurmaTemplateOrientadorId] = useState('');
 
   const fetchData = async () => {
     setLoading(true);
@@ -113,6 +116,7 @@ export const TurmasTab: React.FC = () => {
     setFormTurmaEdicaoId(edicaoAtiva ? String(edicaoAtiva.id) : (edicoes[0] ? String(edicoes[0].id) : ''));
     setFormTurmaOrientadorId('');
     setFormTurmaTemplateId(templates[0] ? String(templates[0].id) : '');
+    setFormTurmaTemplateOrientadorId('');
     setShowModalTurma(true);
   };
 
@@ -123,6 +127,7 @@ export const TurmasTab: React.FC = () => {
     setFormTurmaEdicaoId(String(turma.edicaoId));
     setFormTurmaOrientadorId(turma.orientadorId || '');
     setFormTurmaTemplateId(turma.templateId ? String(turma.templateId) : '');
+    setFormTurmaTemplateOrientadorId(turma.templateOrientadorId ? String(turma.templateOrientadorId) : '');
     setShowModalTurma(true);
   };
 
@@ -135,6 +140,7 @@ export const TurmasTab: React.FC = () => {
         edicaoId: Number(formTurmaEdicaoId),
         orientadorId: formTurmaOrientadorId || null,
         templateId: formTurmaTemplateId ? Number(formTurmaTemplateId) : null,
+        templateOrientadorId: formTurmaTemplateOrientadorId ? Number(formTurmaTemplateOrientadorId) : null,
       };
 
       if (editandoTurmaId) {
@@ -219,7 +225,8 @@ export const TurmasTab: React.FC = () => {
                 <th className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Nome da Turma</th>
                 <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Tema / Livro</th>
                 <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Orientador</th>
-                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Barema (Template)</th>
+                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Barema Avaliadores</th>
+                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Barema Orientador</th>
                 <th className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">Edição</th>
                 <th className="px-3 py-3.5 text-right text-sm font-semibold text-gray-900">Ações</th>
               </tr>
@@ -231,6 +238,7 @@ export const TurmasTab: React.FC = () => {
                   <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{t.temaLivro}</td>
                   <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{t.orientador?.nome || '—'}</td>
                   <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{t.template?.nome || '—'}</td>
+                  <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{t.templateOrientador?.nome || '—'}</td>
                   <td className="whitespace-nowrap px-3 py-4 text-sm text-center font-medium text-gray-900">{t.edicao.ano}</td>
                   <td className="whitespace-nowrap px-3 py-4 text-sm text-right">
                     <button
@@ -350,10 +358,23 @@ export const TurmasTab: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Barema de Avaliação (Visitantes)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Barema de Avaliação (Visitantes / AVALIADORES)</label>
                 <select
                   value={formTurmaTemplateId}
                   onChange={(e) => setFormTurmaTemplateId(e.target.value)}
+                  className="w-full rounded-md border border-gray-300 p-2 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                >
+                  <option value="">Nenhum template atribuído</option>
+                  {templates.map(tmp => (
+                    <option key={tmp.id} value={tmp.id}>{tmp.nome}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Barema do Orientador</label>
+                <select
+                  value={formTurmaTemplateOrientadorId}
+                  onChange={(e) => setFormTurmaTemplateOrientadorId(e.target.value)}
                   className="w-full rounded-md border border-gray-300 p-2 text-sm focus:border-indigo-500 focus:ring-indigo-500"
                 >
                   <option value="">Nenhum template atribuído</option>

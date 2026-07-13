@@ -15,7 +15,7 @@ interface TemplateAvaliacao {
   nome: string;
   descricao?: string | null;
   criterios: Criterio[];
-  _count?: { turmas: number; avaliacoes: number };
+  _count?: { turmasAvaliador: number; turmasOrientador: number; avaliacoes: number };
 }
 
 export const TemplatesTab: React.FC = () => {
@@ -366,7 +366,7 @@ export const TemplatesTab: React.FC = () => {
 
               <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
                 <div className="text-xs text-gray-500">
-                  <span>{tmpl._count?.turmas || 0} turmas</span> • <span>{tmpl._count?.avaliacoes || 0} avaliações</span>
+                  <span>{(tmpl._count?.turmasAvaliador || 0) + (tmpl._count?.turmasOrientador || 0)} turmas</span> • <span>{tmpl._count?.avaliacoes || 0} avaliações</span>
                 </div>
                 <button
                   onClick={() => handleStartEdit(tmpl)}

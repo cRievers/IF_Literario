@@ -44,8 +44,9 @@ router.get('/campea', requireAuth, requireRole(['ADMIN']), async (req: AuthReque
                             achieved += nota.valorNumerico || 0;
                             max += nota.criterio.pesoMaximo || 10;
                         } else if (nota.criterio.tipo === 'BOOLEANO') {
-                            achieved += nota.valorBooleano ? 10 : 0;
-                            max += 10;
+                            const peso = nota.criterio.pesoMaximo || 10;
+                            achieved += nota.valorBooleano ? peso : 0;
+                            max += peso;
                         }
                     }
                     somaGeralAchieved += achieved;
@@ -129,8 +130,9 @@ router.get('/consolidado', requireAuth, requireRole(['ADMIN']), async (req: Auth
                             achieved += nota.valorNumerico || 0;
                             max += nota.criterio.pesoMaximo || 10;
                         } else if (nota.criterio.tipo === 'BOOLEANO') {
-                            achieved += nota.valorBooleano ? 10 : 0;
-                            max += 10;
+                            const peso = nota.criterio.pesoMaximo || 10;
+                            achieved += nota.valorBooleano ? peso : 0;
+                            max += peso;
                         }
                     }
 
@@ -159,8 +161,9 @@ router.get('/consolidado', requireAuth, requireRole(['ADMIN']), async (req: Auth
                         achieved += nota.valorNumerico || 0;
                         max += nota.criterio.pesoMaximo || 10;
                     } else if (nota.criterio.tipo === 'BOOLEANO') {
-                        achieved += nota.valorBooleano ? 10 : 0;
-                        max += 10;
+                        const peso = nota.criterio.pesoMaximo || 10;
+                        achieved += nota.valorBooleano ? peso : 0;
+                        max += peso;
                     }
                 }
 

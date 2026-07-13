@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../../api/client';
+import { supabase } from '../../lib/supabase.js';
 
 interface Avaliacao {
   id: string;
@@ -42,6 +43,50 @@ export const AvaliacoesTab: React.FC = () => {
       setError(err.message || 'Erro ao carregar avaliações');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const [exporting, setExporting] = useState(false);
+
+  const handleExportar = async () => {
+    setExporting(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333';
+      const headers = new Headers();
+      if (token) {
+        headers.set('Authorization', `Bearer ${token}`);
+      }
+      
+      const response = await fetch(`${API_URL}/api/exportar/xlsx`, {
+        method: 'GET',
+        headers,
+      });
+
+      if (!response.ok) {
+        let errorMessage = 'Erro ao exportar notas';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {}
+        throw new Error(errorMessage);
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `IF_Literario_Resultados.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      alert(`Erro ao exportar notas: ${err.message}`);
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -100,12 +145,21 @@ export const AvaliacoesTab: React.FC = () => {
             Visualize e remova avaliações de avaliadores e orientadores.
           </p>
         </div>
-        <button
-          onClick={fetchAvaliacoes}
-          className="rounded bg-gray-100 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-200 transition-colors self-start sm:self-auto"
-        >
-          🔄 Atualizar
-        </button>
+        <div className="flex flex-wrap gap-2 self-start sm:self-auto">
+          <button
+            onClick={fetchAvaliacoes}
+            className="rounded bg-gray-100 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-200 transition-colors"
+          >
+            🔄 Atualizar
+          </button>
+          <button
+            onClick={handleExportar}
+            disabled={exporting}
+            className="rounded bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:bg-emerald-400 transition-colors flex items-center gap-1.5"
+          >
+            {exporting ? '⏳ Exportando...' : '📥 Exportar Notas (.xlsx)'}
+          </button>
+        </div>
       </div>
 
       {/* Barra de pesquisa */}

@@ -24,7 +24,7 @@ A autenticação será delegada ao Supabase Auth via JWT, e a API validará os t
 
 A API deve ser a única fonte da verdade para o processamento de notas.
 
-* **Avaliação 1 (Turma Campeã):** Apurada em tempo real. O cálculo é a **soma/média simples** das notas dos 3 avaliadores visitantes.
+* **Avaliação 1 (Turma Campeã):** Apurada em tempo real. O cálculo é a **soma/média simples** das notas dos n avaliadores visitantes.
 * **Avaliação 2 (Nota no Sistema Escolar):** Calculada convertendo a pontuação bruta em porcentagem, utilizando a fórmula base:
 
 $$Nota Final = \left( \frac{M\acute{e}dia\ Avaliadores + Nota\ Orientador}{2} \right) \times 100$$

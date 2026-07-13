@@ -123,7 +123,7 @@ router.put('/:id', requireAuth, requireRole(['ADMIN']), async (req: AuthRequest,
             // 3. Atualizar ou criar critérios
             for (const item of criterios) {
                 const tipo = item.tipo || 'NUMERICO';
-                const pesoMaximo = tipo === 'NUMERICO'
+                const pesoMaximo = (tipo === 'NUMERICO' || tipo === 'BOOLEANO')
                     ? (item.pesoMaximo ? parseFloat(item.pesoMaximo) : 10)
                     : null;
                 const faixasNota: string[] = Array.isArray(item.faixasNota)

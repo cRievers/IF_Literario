@@ -216,7 +216,7 @@ export const TemplatesTab: React.FC = () => {
                           <option value="TEXTO">Texto Livre</option>
                         </select>
                       </div>
-                      {crit.tipo === 'NUMERICO' && (
+                      {(crit.tipo === 'NUMERICO' || crit.tipo === 'BOOLEANO') && (
                         <div className="w-full md:w-1/4">
                           <label className="block text-xs font-semibold text-gray-600 mb-1">Peso / Nota Máxima</label>
                           <input
